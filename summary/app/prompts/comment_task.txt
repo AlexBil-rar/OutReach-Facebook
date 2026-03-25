@@ -1,0 +1,67 @@
+Task: Enrich a social COMMENT with two attributes: comment_location and comment_intent.
+
+Input (JSON):
+- comment_id (string)
+- post_text (string, may be empty)
+- comment_text (string, may be empty)
+
+Output (JSON):
+Return ONLY a single JSON object with EXACT keys:
+{
+  "comment_id": "<same as input>",
+  "comment_location": "<Hebrew locations or 'Unknown'>",
+  "comment_intent": "Sell" | "Buy" | "Unknown"
+}
+No extra keys. No explanations. No additional text.
+
+A) comment_intent (Sell / Buy / Unknown)  [COMMENTS ONLY]
+
+Rules:
+- If comment_text is empty / no meaningful text -> comment_intent = "Unknown".
+- Determine intent using BOTH post_text and comment_text; if post_text is empty -> use comment_text only.
+- If post is Sell AND comment asks price/details, leaves contact, asks to be contacted, “call me”, etc. -> comment_intent = "Buy".
+- If post is Buy AND comment offers something for sale (e.g., “יש לי”, “למכירה”, “מוכר”, gives plot/price/phone as an offer) -> comment_intent = "Sell".
+- If cannot determine -> comment_intent = "Unknown".
+
+B) comment_location  [COMMENTS ONLY]
+
+Rules:
+Output format:
+- Hebrew only (except the literal word "Unknown").
+- Comma-separated, in order of appearance.
+- If no valid location -> output exactly "Unknown".
+
+Extraction rules (same as posts):
+Extract ONLY meaningful Israeli locations, in Hebrew, comma-separated, in order of appearance.
+KEEP: cities/towns/localities (incl. kibbutz/moshav) + large regions (e.g., גוש דן, השרון, השפלה, הנגב, הגליל, אזור המרכז/צפון/דרום).
+IGNORE: neighborhoods/quarters (שכונה/רובע), streets/roads (רחוב/כביש), complexes/micro IDs (מתחם/פרויקט/שלב/מגרש), and any land/legal/plan codes (גוש/חלקה/תמל/תוכנית + all numbers/codes).
+
+Normalize:
+- Remove attached prepositions ב/ל/כ/מ (output base name only).
+- Expand abbreviations:
+  ת"א/תא→תל אביב יפו
+  ראשל"צ/ראשלצ→ראשון לציון
+  פ"ת→פתח תקווה
+  ר"ג→רמת גן
+  ב"ש→באר שבע
+  (add more ONLY if shown in the CSV examples)
+- Remove hyphens in output (תל אביב-יפו→תל אביב יפו).
+- Fix misspellings ONLY when highly confident AND consistent with CSV examples.
+- De-duplicate while keeping first appearance order.
+
+Fallback rule (COMMENTS ONLY):
+1) Extract locations from comment_text using the same location rules/normalization.
+2) If comment_text has at least one valid location → output those.
+3) Otherwise, extract locations from post_text and output those.
+4) If neither contains a valid location → output exactly "Unknown".
+
+C) Empty / no-text handling
+
+If comment_text is empty/no meaningful text:
+- comment_intent MUST be "Unknown"
+- comment_location MUST be:
+  - If post_text has valid locations -> use fallback step 3 (post_text locations)
+  - Otherwise -> "Unknown"
+
+Return ONLY the final JSON object.
+

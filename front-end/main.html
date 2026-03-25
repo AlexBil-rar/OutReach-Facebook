@@ -1,0 +1,5864 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+  <title>FB Groups Outreach Dashboard</title>
+  <style>
+    :root{
+      --bg: #F4F5F7;
+      --panel: #FFFFFF;
+      --text: #172B4D;
+      --muted: #5E6C84;
+      --border: #DFE1E6;
+      --grid: #EBECF0;       /* lighter table gridlines */
+      --header: #FAFBFC;
+      --hover: #F7F8F9;
+      --focus: rgba(12,102,228,.14);
+      --link: #4C9BFF;          /* softer blue for links */
+      --primary: #4C9BFF;
+      --primary-bg: rgba(76,155,255,.10);
+      --green: #22A06B;
+      --green-bg: rgba(34,160,107,.10);
+      --shadow: 0 8px 24px rgba(9,30,66,.18);
+      --radius: 12px;
+      --radius-sm: 10px;
+      --topbar-h: 64px;
+      --sidebar-w: 260px;
+      --sidebar-w-collapsed: 76px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+
+    *{ box-sizing: border-box; }
+    *, *::before, *::after{ font-family: var(--font); }
+    button, input, select, textarea{ font-family: var(--font); }
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--bg);
+      overflow-x: hidden; /* prevent page-level horizontal scroll */
+    }
+
+    a{ color: var(--link); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+
+    /* Layout */
+    .app{
+      display:flex;
+      min-height:100vh;
+      width:100%;
+    }
+.export-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.export-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px 20px;
+  align-items: center;
+}
+
+.export-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.export-value {
+  font-weight: 600;
+}
+
+.export-field-wrapper {
+  width: 100%;
+}
+
+.export-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+    .sidebar{
+      width: var(--sidebar-w);
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top:0;
+      height:100vh;
+      display:flex;
+      flex-direction: column;
+      transition: width .18s ease;
+      z-index: 30;
+    }
+    .sidebar.collapsed{ width: var(--sidebar-w-collapsed); }
+
+.ts-dropdown-content {
+  z-index: 10000;
+}
+    .sidebarHeader{
+      height: var(--topbar-h);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .burger{
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+    }
+    .burger:hover{ background: var(--hover); }
+    .burger:focus{ outline: none; box-shadow: 0 0 0 3px var(--focus); }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .logo{
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1D7AFC, #0C66E4);
+    }
+    .brandText{
+      font-weight: 800;
+      letter-spacing: .2px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar.collapsed .brandText{ display:none; }
+
+    .linkCell {
+  cursor: pointer;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.linkCell:hover {
+  text-decoration: underline;
+}
+    .nav{
+      padding: 10px;
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .navItem{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor:pointer;
+      color: var(--text);
+      border: 1px solid transparent;
+      user-select:none;
+    }
+    .navItem:hover{ background: var(--hover); }
+    .navItem.active{
+      background: rgba(12,102,228,.08);
+      border: 1px solid rgba(12,102,228,.22);
+      color: #09326C;
+      font-weight: 700;
+    }
+    .navIcon{
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      color: currentColor;
+    }
+    .navLabel{
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .sidebar.collapsed .navLabel{ display:none; }
+
+    .sidebarFooter{
+      margin-top: auto;
+      padding: 12px 14px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .sidebar.collapsed .sidebarFooter span{ display:none; }
+
+    /* Main */
+    .main{
+      flex:1;
+      display:flex;
+      flex-direction: column;
+      min-width:0;
+    }
+
+    .topbar{
+      position: sticky;
+      top:0;
+      z-index: 20;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    .topbarInner{
+      padding: 14px 18px 12px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pageHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .titleWrap{ min-width:0; }
+    .pageTitle{ font-size: 18px; font-weight: 900; margin:0; }
+    .pageSubtitle{ margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+    .headerActions{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+    }
+
+    .btn{
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor:pointer;
+      font-weight: 700;
+      color: var(--text);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .btn:hover{ background: var(--hover); }
+    .btn:focus{ outline:none; box-shadow: 0 0 0 3px var(--focus); }
+
+    .btn.primary{
+      border-color: rgba(12,102,228,.26);
+      background: var(--primary-bg);
+      color: #09326C;
+    }
+    .btn.success{
+      border-color: rgba(34,160,107,.35);
+      background: var(--green-bg);
+      color: #0B5A3C;
+    }
+    .btn.danger{
+      border-color: rgba(234,84,85,.35);
+      background: rgba(234,84,85,.12);
+      color: #923232;
+    }
+
+    .btn.ghost{
+      background: transparent;
+    }
+
+    .badge{
+      display: none;
+      align-items:center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--header);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .badge.warn{
+      border-color: rgba(245, 205, 71, .55);
+      background: rgba(245, 205, 71, .14);
+      color: #5D3B09;
+    }
+
+    .filters{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filters.hidden{ display:none; }
+
+    .filterRow{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field{
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 160px;
+      max-width: 320px;
+    }
+    .field.wide{ min-width: 280px; max-width: 520px; }
+    .field.small{ min-width: 140px; max-width: 220px; }
+    .field label{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      letter-spacing: .2px;
+      display:flex;
+      align-items:center;
+      gap: 6px;
+    }
+.export-active-filters {
+  margin-bottom: 16px;
+}
+
+.export-active-filters .label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: #eef2ff;
+  color: #2b4eff;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+    .input, select{
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: var(--panel);
+      color: var(--text);
+      outline: none;
+      font: inherit;
+      font-size: 13px;
+    }
+    .input:focus, select:focus{
+      border-color: rgba(12,102,228,.35);
+      box-shadow: 0 0 0 3px var(--focus);
+    }
+
+    .rangeWrap{
+      display:flex;
+      gap: 8px;
+      align-items:center;
+    }
+    .rangeVal{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      min-width: 72px;
+      text-align:center;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 8px;
+      background: var(--header);
+    }
+    input[type="range"]{
+      width: 180px;
+      accent-color: var(--primary);
+    }
+
+    /* Content */
+    .content{
+      padding: 14px 18px 25px;
+      min-width:0;
+    }
+
+    .tableCard{
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .tableToolbar{
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+      flex-wrap: wrap;
+    }
+
+    .meta{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      color: var(--muted);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .tableScroller{
+    flex: 1 1 auto;
+    overflow: auto;
+  }
+
+  .export-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+}
+
+.export-format {
+  min-width: 100px;
+}
+
+.export-fields {
+  flex: 1;
+}
+
+.export-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.export-fields .label,
+.export-format .label {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+.export-format .value {
+  font-weight: 600;
+}
+
+    .tableScrollTop{
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+      height: 16px;
+      background: var(--header);
+      -webkit-overflow-scrolling: touch;
+    }
+    .tableScrollSpacer{ height: 16px; }
+    .tableWrap{
+      max-width: 100%;
+      height: calc(100vh - 200px);
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable both-edges;
+    }
+    @supports not selector(::-webkit-scrollbar){
+      .tableWrap{ scrollbar-width: thin; }
+    }
+
+    table{
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 980px;
+      text-align: center;
+    }
+
+    thead th{
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--header);
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .3px;
+      text-align: center;
+      padding: 10px 9px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--grid);
+      white-space: nowrap;
+      vertical-align: middle;
+      overflow: visible;
+    }
+    thead th:last-child{ border-right: 0; }
+
+    tbody td{
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--grid);
+      border-right: 1px solid var(--grid);
+      vertical-align: middle;
+      text-align: center;
+      font-size: 13px;
+      background: var(--panel);
+    }
+    tbody td:last-child{ border-right: 0; }
+
+    tbody tr:hover td{ background: var(--hover); }
+
+    .cellMuted{ color: var(--muted); }
+    .cellMono{ font-family: var(--font); font-size: 12px; }
+    .nowrap{ white-space: nowrap; }
+    .center{ text-align:center; }
+    .right{ text-align:right; }
+
+    /* Sticky right column (Contacted) */
+    .stickyRight{
+      position: sticky;
+      right: 0;
+      z-index: 4;
+      background: var(--panel);
+      box-shadow: -10px 0 12px rgba(9,30,66,.06);
+    }
+    thead th.stickyRight{
+      z-index: 7;
+      background: var(--header);
+    }
+
+    /* Row number */
+    .rowNo{ width: 56px; }
+
+    /* Type icons */
+    .typeIcon{
+      width: 22px;
+      height: 22px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--header);
+    }
+    .typeIcon svg{ width: 16px; height: 16px; color: var(--muted); }
+
+    .filterList.vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.filterPopover {
+  min-width: 220px;
+}
+
+    /* User/group cells */
+    .entity{
+      display:flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 160px;
+      align-items: center;
+      text-align: center;
+    }
+    .entity.groupEntity{
+      min-width: 120px;
+      max-width: 220px;
+      align-items: center;
+      text-align: center;
+    }
+    .entityTop{
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      min-width:0;
+      justify-content: center;
+    }
+    .entityName{
+      font-weight: 900;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 320px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: var(--link);
+      text-align: left;
+    }
+    .groupEntity .entityName{
+      white-space: normal;
+      line-height: 1.3;
+      text-align: center;
+      display: block;
+    }
+    .groupCol{ width: 200px; max-width: 220px; }
+    .longCol{ min-width: 480px; }
+    .summaryCol{ min-width: 400px; max-width: 480px; }
+    .summaryColNotes{min-width: 180px; max-width: 180px; }
+    .entitySub{
+      color: var(--muted);
+      font-size: 12px;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 420px;
+    }
+    .miniBtn{
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      cursor: pointer;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .miniBtn:hover{ background: var(--hover); }
+    .miniBtn:focus{ outline:none; box-shadow: 0 0 0 3px var(--focus); }
+
+    /* Open link button */
+    .linkBtn{
+      border: 1px solid var(--border);
+      background: var(--header);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      cursor:pointer;
+      white-space: nowrap;
+      transition: background .12s ease;
+    }
+    .linkBtn:hover{ background: var(--hover); }
+    .linkBtn:focus{ outline:none; box-shadow: 0 0 0 3px var(--focus); }
+    .userNameBtn{
+      color: var(--link);
+      border-color: rgba(76,155,255,.35);
+      background: var(--header);
+    }
+
+       .contactsModal{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+
+.contactBlock{
+  padding:12px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+}
+
+.contactLabel{
+  font-size:12px;
+  color:#6b7280;
+  margin-bottom:4px;
+}
+
+.contactValue{
+  font-size:14px;
+  color:#2563eb;
+  text-decoration:none;
+}
+
+.contactValue:hover{
+  text-decoration:underline;
+}
+    .userNameBtn:hover{ background: var(--primary-bg); color: #2f7ed6; }
+    .openLink{
+      display:inline-block;
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-weight: 900;
+      color: var(--link);
+      text-decoration: none;
+      border-radius: 0;
+    }
+    .openLink:hover{ text-decoration: underline; background: transparent; }
+    .openLink:focus{ outline: none; box-shadow: 0 0 0 3px var(--focus); }
+
+    /* Contacted pill */
+    .contactPill{
+      display:inline-flex;
+      align-items:center;
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: var(--header);
+      color: var(--muted);
+      cursor: pointer;
+      user-select:none;
+      white-space: nowrap;
+      justify-content:center;
+      width: 120px;
+      margin: 0 auto;
+    }
+
+    .contactPill.yes{
+      border-color: rgba(34,160,107,.35);
+      background: var(--green-bg);
+      color: #0B5A3C;
+    }
+    .contactPill.no{
+      border-color: rgba(234,84,85,.35);
+      background: rgba(234,84,85,.12);
+      color: #923232;
+    }
+
+    /* Two-line clamp + More */
+    .clampCell{ display:flex; flex-direction: column; gap: 4px; }
+    .clamp2{
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      line-height: 1.35;
+      word-break: break-word;
+      cursor: pointer;
+      position: relative;
+      border-radius: 6px;
+      padding: 2px 4px;
+      transition: box-shadow .12s ease, background .12s ease;
+      text-align: start;
+      direction: auto;
+    }
+    .clamp2:hover{
+      box-shadow: inset 0 0 0 1px var(--primary);
+      background: var(--primary-bg);
+    }
+
+    .cellClick{
+      display: inline-block;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 400;
+      border-radius: 6px;
+      padding: 2px 4px;
+      transition: box-shadow .12s ease, background .12s ease;
+    }
+    .cellClick:hover{
+      box-shadow: inset 0 0 0 1px var(--primary);
+      background: var(--primary-bg);
+    }
+    .clamp2.truncated{
+      cursor: pointer;
+    }
+    .clamp2.truncated::after{
+      content: "...";
+      color: var(--muted);
+      margin-left: 4px;
+    }
+
+    .summaryStack{ display:flex; flex-direction: column; gap: 6px; }
+    .summaryLabel{ font-size: 11px; font-weight: 800; color: var(--muted); letter-spacing: .2px; }
+    .summaryMeta{
+      display:flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items:center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    
+    .contactsCell{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+
+    .contactLink{
+      color:#2563eb;
+      text-decoration:none;
+      font-size:13px;
+    }
+
+    .contactLink:hover{
+      text-decoration:underline;
+    }
+
+    .blockContent {
+  margin-top: 6px;
+}
+
+    .NotesTextarea {
+      background: #fff;
+      padding: 0px;
+      width: 100% !important ;
+      min-height: 40px;
+      border-radius: 0px;
+      border: 1px solid #ffff;
+      outline: none
+    }
+
+    /* Header help tooltip */
+    .help{
+      position: relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      cursor: default;
+      user-select:none;
+      margin-left: 4px;
+      flex: 0 0 auto;
+    }
+    .help:hover::after{
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 20px;
+      background: #1D2125;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      width: 240px;
+      line-height: 1.3;
+      z-index: 50;
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+    }
+    .help:hover::before{
+      content: "";
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-bottom-color: #1D2125;
+      z-index: 50;
+    }
+
+    .thHelp{
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+    }
+
+
+    .thFilterWrap{
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filterBtn{
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .filterBtn:hover{ background: var(--hover); }
+    .filterBtn.active{
+      border-color: rgba(12,102,228,.35);
+      background: var(--primary-bg);
+      color: #0C66E4;
+    }
+    .filterBtn svg{ width: 14px; height: 14px; }
+    .filterPopover{
+      position: absolute;
+      top: calc(100% + 6px);
+      transform: translateX(-40%);
+      display: none;
+      padding: 8px;
+      background: #F7F9FF;
+      color: #112A45;
+      border: 1px solid #D5DFF7;
+      border-radius: 12px;
+      box-shadow: 0 10px 20px rgba(16,42,67,.14);
+      z-index: 90;
+      text-align: left;
+    }
+    .filterPopover.open{ display: block; }
+    .filterTitle{
+      font-weight: 500;
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: #1B2A3A;
+    }
+    .filterList{
+      max-height: 120px;
+      overflow: auto;
+      padding-right: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .filterOption{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      line-height: 1.3;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 400;
+    }
+    .filterActions{
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .filterPopover .btn{ font-weight: 500; }
+    .filterPopover .btn.active{
+      border-color: rgba(12,102,228,.35);
+      background: var(--primary-bg);
+      color: #0C66E4;
+    }
+    .btn.small{
+      padding: 5px 9px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    .globalSearchWrap{
+      min-width: 480px;
+      flex: 1 1 480px;
+      max-width: 840px;
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .globalSearchInput{
+      width: 100%;
+      padding: 8px 12px 8px 30px;
+      border-radius: 10px;
+      background-color: var(--panel);
+      background-repeat: no-repeat;
+      background-position: 10px center;
+      background-size: 14px 14px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235E6C84' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>");
+    }
+    /* .globalSearchBtn{
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 10px;
+    } */
+    .filterTools{
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .filterInput{
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: 12px;
+      background: var(--panel);
+      color: var(--text);
+      appearance: none;
+    }
+    .stickyRight.thFilter{ position: sticky; }
+
+    /* Modal */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(9,30,66,.55);
+      display:none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 200;
+    }
+    .modalOverlay.open{ display:flex; }
+
+    .modal{
+      width: min(900px, 100%);
+      max-height: 90vh;            /* ← НЕ больше 90% экрана */
+      display: flex;               /* ← чтобы body мог сжиматься */
+      background: var(--panel);
+      flex-direction: column;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(223,225,230,.9);
+      overflow: visible;
+      font-family: var(--font);
+    }
+    .modal *{ font-family: inherit; }
+    .modal.narrow{ width: min(420px, 100%); }
+    .modalHeader{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      /* background: var(--header); */
+    }
+    .modalTitle{ font-weight: 900; margin:0; font-size: 14px; color: var(--text); }
+    .modalBody{ 
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;   /* 🔥 КРИТИЧНО */ 
+    }
+    .modalBody .metaLine{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      color: var;
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .modalBody .block{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: var(--panel);
+      margin-top: 10px;
+      overflow-y: auto;
+      max-height: 100%;
+    }
+    .modalBody .blockTitle{
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--text);
+      letter-spacing: .2px;
+      margin-bottom: 6px;
+    }
+    .modalBody .blockText{
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.45;
+      font-size: 13px;
+      font-weight: 400;
+    }
+    .confirmList{
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 400;
+    }
+    .confirmStatus{
+      margin-top: 12px;
+      display:flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 400;
+    }
+    #paginationBar{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
+    #paginationBar .input.small{
+      height: 32px;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    #paginationBar .btn.small{
+      height: 32px;
+      padding: 0 10px;
+    }
+
+    .modal-content {
+   overflow: visible;
+}
+
+    .modalFooter{
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      display:flex;
+      justify-content: flex-end;
+      gap: 10px;
+      /* background: var(--header); */
+      flex-wrap: wrap;
+    }
+
+  .tableFooter{
+  flex: 0 0 auto;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  justify-content: center;
+}
+
+    #paginationBar{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px){
+      .sidebar{
+        position: fixed;
+        left:0;
+        top:0;
+        transform: translateX(-100%);
+        transition: transform .18s ease, width .18s ease;
+        height: 100vh;
+      }
+      .sidebar.mobileOpen{ transform: translateX(0); }
+      .topbarInner{ padding: 12px; }
+      .content{ padding: 12px; }
+      table{ min-width: 920px; }
+      .field{ min-width: 150px; }
+      .tableWrap{ height: calc(100vh - 180px); }
+    }
+
+
+.contactPill{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  border:1px solid var(--border);
+  cursor:pointer;
+}
+
+.status-0{ background:#eef2ff; color:#3730a3; } /* New */
+.status-1{ background:#f3f4f6; color:#374151; } /* Not relevant */
+.status-2{ background:#fff7ed; color:#9a3412; } /* Response expected */
+.status-3{ background:#fee2e2; color:#991b1b; } /* Negative */
+.status-4{ background:#dcfce7; color:#166534; } /* Positive */
+
+
+.statusOptions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:12px;
+}
+
+.statusOption{
+  padding:10px 14px;
+  border-radius:8px;
+  font-weight:600;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:all .15s ease;
+}
+
+.statusOption:hover{
+  transform:translateY(-1px);
+  opacity:.9;
+}
+
+.statusOption.active{
+  border:2px solid #111;
+}
+
+.contactPill{
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  border:none;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+
+.contactPill:hover{
+  transform:translateY(-1px);
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+
+.btn.primary{
+  background:#2563eb;
+  color:white;
+  font-weight:600;
+  box-shadow:0 2px 8px rgba(37,99,235,.3);
+}
+
+.btn.primary:hover{
+  background:#1d4ed8;
+}
+
+.btnTrash {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btnTrash.active {
+  background: #111;
+  color: white;
+}
+
+.contextMenu{
+  position:absolute;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:6px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+  display:none;
+  z-index:10000;
+}
+
+.contextItem{
+  padding:8px 12px;
+  cursor:pointer;
+}
+
+.contextItem:hover{
+  background:#f5f5f5;
+}
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebarHeader">
+        <button class="burger" id="sidebarToggle" title="Toggle sidebar (B)">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M4 6h16" />
+            <path d="M4 12h16" />
+            <path d="M4 18h16" />
+          </svg>
+        </button>
+        <div class="brand" title="FB Groups Outreach Dashboard">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="brandText">Outreach Dashboard</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <div class="navItem active" data-view="all">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
+          </svg>
+          <span class="navLabel">All</span>
+        </div>
+
+        <div class="navItem" data-view="users">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="navLabel">Users</span>
+        </div>
+
+        <div class="navItem" data-view="posts">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 3h12v18H6z"/>
+            <path d="M6 7h12"/>
+            <path d="M9 11h6"/>
+            <path d="M9 15h6"/>
+            <path d="M4 7v13a1 1 0 0 0 1 1h13"/>
+          </svg>
+          <span class="navLabel">Posts</span>
+        </div>
+
+        <div class="navItem" data-view="comments">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z"/>
+          </svg>
+          <span class="navLabel">Comments</span>
+        </div>
+
+        <div class="navItem" data-view="trash" id="toggleTrashBtn">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+          <span class="navLabel">Trash</span>
+        </div>
+
+        <div class="navItem" data-view="dashboard">
+          <svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M7 14v3"/>
+            <path d="M12 10v7"/>
+            <path d="M17 7v10"/>
+          </svg>
+          <span class="navLabel">Dashboard</span>
+        </div>
+      </nav>
+
+
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="topbarInner">
+          <div class="pageHeader">
+            <div class="titleWrap">
+              <h1 class="pageTitle" id="pageTitle">All</h1>
+              <p class="pageSubtitle" id="pageSubtitle">Unified backlog view of posts and comments across Facebook groups</p>
+            </div>
+            <div class="headerActions">
+                <div class="globalSearchWrap">
+                  <input class="input globalSearchInput" id="globalSearch" placeholder="Search anything" />
+                  <button class="btn globalSearchBtn" id="globalSearchApply">Search</button>
+                </div>
+                <button class="btn" id="resetBtn">Reset all filters</button>
+                <button class="btn ghost" onclick="openExportModal()">Export</button>
+              <span class="badge warn" id="dirtyBadge" style="display:none;">Filters changed — not applied</span>
+            </div>
+          </div>
+
+          <div class="filters hidden" id="filters">
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="tableCard">
+         <div class="tableToolbar">
+            <div class="meta" id="meta"></div>
+            <div class="meta">
+              <span class="badge" id="activeFilterPill">Filters: —</span>
+              <span class="badge" id="userFocusPill" style="display:none;"></span>
+
+            </div>
+          </div>
+          <div class="tableScroller">
+            <div class="tableWrap" id="tableWrap">
+              <table class="table"></table>
+            </div>
+          </div>
+
+            <div class="tableFooter">
+            <div id="paginationBar"></div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modalOverlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="modalHeader">
+        <h3 class="modalTitle" id="modalTitle">Modal</h3>
+        <button class="btn" id="modalClose" aria-label="Close">Close</button>
+      </div>
+      <div class="modalBody" id="modalBody"></div>
+      <div class="modalFooter" id="modalFooter"></div>
+    </div>
+  </div>
+  
+<div id="contextMenu" class="contextMenu">
+  <div class="contextItem" id="trashAction">Move to trash</div>
+  <div class="contextItem" id="restoreAction">Restore</div>
+</div>
+  <script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const role = localStorage.getItem("user_role");
+
+  if (role !== "admin") {
+    document.querySelector('[data-view="dashboard"]')?.remove();
+  }
+
+  render(); // если render вызывается при старте
+});
+/* ==============================
+   AUTH GUARD
+============================== */
+const AUTH_TOKEN = localStorage.getItem("auth_token");
+if (!AUTH_TOKEN) {
+  window.location.href = "/login";
+}
+
+
+
+
+/* ==============================
+   API FETCH
+============================== */
+function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("auth_token");
+
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      "Authorization": "Bearer " + token
+    }
+  }).then(async res => {
+    if (res.status === 401) {
+      localStorage.removeItem("auth_token");
+      window.location.href = "/login";
+      throw new Error("Unauthorized");
+    }
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("API error:", text);
+      throw new Error("Server error");
+    }
+
+    return res.json();
+  });
+}
+
+/* ==============================
+   DATA + BOOTSTRAP
+============================== */
+const DB = {
+  User: [],
+  Post: [],
+  Comment: [],
+  Group: [],
+  trash: []
+};
+
+(async function bootstrap() {
+  try {
+    const [users, posts, comments, groups, trashs] = await Promise.all([
+      apiFetch("/users"),
+      apiFetch("/posts"),
+      apiFetch("/comments"),
+      apiFetch("/groups"),
+      apiFetch("/trash/posts")
+      ]);
+
+    DB.User = users;
+    DB.Post = posts;
+    DB.Comment = comments;
+    DB.Group = groups;
+    DB.trash = trashs
+
+    render(); // ← твой существующий рендер
+
+  } catch (err) {
+    console.error("Bootstrap error:", err);
+  }
+})();
+
+    // ------------------------
+    // State: applied vs draft (so filters only apply when user clicks Apply)
+    // ------------------------
+    const state = {
+      view: "all",
+      sidebarCollapsed: false,
+      mobileSidebarOpen: false,
+      filtersOpen: true,
+
+      userFocus: null, // { UserID, UserName } to quickly jump from Users -> Posts/Comments
+      postFocus: null,   // 👈 добавить
+
+
+      pagination: {
+        all:      { page: 1, pageSize: 50 },
+        users:    { page: 1, pageSize: 50 },
+        posts:    { page: 1, pageSize: 50 },
+        comments: { page: 1, pageSize: 50 },
+        trash: { page: 1, pageSize: 50 }
+      },
+
+        draft: {
+          all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+          users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest",status:[] },
+          posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+          comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+          trash: { dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+        },
+
+        applied: {
+          all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[0,1,2,3,4] },
+          users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest", status:[0,1,2,3,4] },
+          posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+          comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+          trash:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        },
+
+        
+    };
+
+    state.defaults = {
+      all:      structuredClone(state.applied.all),
+      users:    structuredClone(state.applied.users),
+      posts:    structuredClone(state.applied.posts),
+      comments: structuredClone(state.applied.comments),
+      trash: structuredClone(state.applied.trash)
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+
+    const USER_STATUS = {
+        0: "New",
+        // 1: "Not relevant",
+        2: "Response expected",
+        3: "Negative response",
+        4: "Positive response"
+      };
+
+
+    // ------------------------
+    // Utilities
+    // ------------------------
+    function escapeHtml(str){
+      return String(str ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function parseISO(dateStr){
+      if(!dateStr) return null;
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    async function movePostToTrash(postId) {
+  await apiFetch(`/posts/${postId}/trash`, {
+    method: "PATCH"
+  });
+
+  // 🔥 перезагрузить данные
+  DB.Post = await apiFetch("/posts");
+  DB.Comment = await apiFetch("/comments");
+
+  render();
+}
+
+async function reloadPostsAndComments() {
+  const [posts, comments] = await Promise.all([
+    apiFetch("/posts"),
+    apiFetch("/comments")
+  ]);
+
+  DB.Post = posts;
+  DB.Comment = comments;
+}
+
+
+  function formatDateShort(dateStr){
+    if(!dateStr) return "—";
+
+    const d = new Date(dateStr);
+    if(isNaN(d.getTime())) return "—";
+
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = String(d.getFullYear()).slice(-2);
+
+    return `${dd}/${mm}/${yy}`;
+  }
+
+    function userById(UserID){
+      return DB.User.find(u => u.UserID === UserID) || null;
+    }
+
+    function postById(PostID){
+    return DB.Post.find(p => p.PostID === PostID) || null;
+  }
+
+    function GroupById(GroupID){
+      return DB.Group.find(g => g.GroupID === GroupID) || null;
+    }
+
+    function extractGroupUrlFromPostUrl(postUrl){
+  if(!postUrl) return null;
+  const m = postUrl.match(/facebook\.com\/groups\/[^\/]+/);
+  return m ? `https://www.${m[0]}` : null;
+}
+
+    function GroupByUrl(url){
+  return DB.Group.find(g => g.GroupURL === url) || null;
+}
+
+    function getContacted(UserID){
+      const u = userById(UserID);
+      return u ? !!u.Contacted : false;
+    }
+
+    function friendlySellBuy(v){
+      if(Array.isArray(v)){
+        return v.map(friendlySellBuy).join(", ");
+      }
+      v = (v ?? "unknown");
+      if(typeof v !== "string") v = String(v);
+      v = v.toLowerCase();
+      if(v === "sell") return "Sell";
+      if(v === "buy") return "Buy";
+      return "Unknown";
+    }
+
+    function inferSellBuyFromText(text){
+      if(!text) return "unknown";
+      const t = text.toLowerCase();
+      if(t.includes("selling") || t.includes("sell") || t.includes("for sale") || t.includes("прода")) return "sell";
+      if(t.includes("buy") || t.includes("looking to buy") || t.includes("budget") || t.includes("куплю") || t.includes("מחפש")) return "buy";
+      return "unknown";
+    }
+
+    function detectLanguage(text){
+      const s = String(text || "");
+      const hasHeb = /[\u0590-\u05FF]/.test(s);
+      const hasCyr = /[\u0400-\u04FF]/.test(s);
+      const hasAra = /[\u0600-\u06FF]/.test(s);
+      const hasLat = /[A-Za-z]/.test(s);
+      const flags = [hasHeb, hasCyr, hasAra, hasLat].filter(Boolean).length;
+      if(flags >= 2) return "Mixed";
+      if(hasHeb) return "Hebrew";
+      if(hasCyr) return "Russian";
+      if(hasAra) return "Arabic";
+      if(hasLat) return "English";
+      return "Unknown";
+    }
+
+    function matchesLanguage(lang, text){
+      if(!lang || lang === "all") return true;
+      return detectLanguage(text) === lang;
+    }
+
+function extractContacts(obj = {}) {
+  return {
+    phone: obj.Phone || "",
+    email: obj.Email || ""
+  };
+}
+
+function openPostComments(postId) {
+
+  state.postFocus = String(postId);
+  state.userFocus = null;
+
+  closeModal();  // если есть
+
+  state.view = "comments";
+  state.pagination.comments.page = 1;
+
+  render();
+}
+
+function contactsToHtml(contacts){
+  const { phone = "", email = "" } = contacts || {};
+  if(!phone && !email) return "";
+  const parts = [];
+  if(phone) parts.push(`<div class="cellMono nowrap">${escapeHtml(phone)}</div>`);
+  if(email) parts.push(`<div class="nowrap">${escapeHtml(email)}</div>`);
+  return parts.join("");
+}
+
+
+
+    function aggUserContacts(UserID){
+      let phone = "";
+      let email = "";
+
+      for(const p of DB.Post){
+        if(p.UserID !== UserID) continue;
+        phone = phone || (p.Phone || "");
+        email = email || (p.Email || "");
+      }
+
+      for(const c of DB.Comment){
+        if(c.UserID !== UserID) continue;
+        phone = phone || (c.Phone || "");
+        email = email || (c.Email || "");
+      }
+
+      return [phone, email].filter(Boolean).join(", ");
+    }
+
+
+    function getUserLastActivityDate(UserID){
+      let max = null;
+      for(const p of DB.Post){
+        if(p.UserID === UserID){
+          const d = parseISO(p.PostDate);
+          if(d && (!max || d > max)) max = d;
+        }
+      }
+      for(const c of DB.Comment){
+        if(c.UserID === UserID){
+          const d = parseISO(c.CommentDate);
+          if(d && (!max || d > max)) max = d;
+        }
+      }
+      return max;
+    }
+
+
+    function extractContacts(entity){
+      const raw = entity.Contacts;
+      if(typeof raw !== "string" || !raw.trim()) return null;
+
+      const parts = raw.split(",").map(s => s.trim());
+
+      return {
+        phone: parts.find(p => /^\+?\d{7,}/.test(p)) || null,
+        email: parts.find(p => p.includes("@")) || null,
+        web:   parts.find(p => p.startsWith("http")) || null
+      };
+    }
+
+
+
+
+
+    function openContactsModal(c){
+      const overlay = document.getElementById("modalOverlay");
+      const title   = document.getElementById("modalTitle");
+      const body    = document.getElementById("modalBody");
+
+      title.textContent = "Contacts";
+
+      const blocks = [];
+
+      if(c.phone){
+        blocks.push(`
+          <div class="contactBlock">
+            <div class="contactLabel">📞 Phone</div>
+            <a href="tel:${c.phone}" class="contactValue">${c.phone}</a>
+          </div>
+        `);
+      }
+
+      if(c.email){
+        blocks.push(`
+          <div class="contactBlock">
+            <div class="contactLabel">✉️ Email</div>
+            <a href="mailto:${c.email}" class="contactValue">${c.email}</a>
+          </div>
+        `);
+      }
+
+      if(c.web){
+        blocks.push(`
+          <div class="contactBlock">
+            <div class="contactLabel">🌐 Website</div>
+            <a href="${c.web}" target="_blank" class="contactValue">
+              ${c.web}
+            </a>
+          </div>
+        `);
+      }
+
+      body.innerHTML = `
+        <div class="contactsModal">
+          ${blocks.join("")}
+        </div>
+      `;
+
+      overlay.classList.add("open");
+    }
+
+
+
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-action='openContacts']");
+  if(!el) return;
+
+  const contacts = JSON.parse(el.dataset.contacts);
+  openContactsModal(contacts);
+});
+
+  document.getElementById("modalClose").onclick = () => {
+  document.getElementById("modalOverlay").classList.remove("open");
+};
+
+
+    // ------------------------
+    // Filter UI (rendered per view, Jira-like and calm)
+    // ------------------------
+    function selectOptions(values, selected){
+      return values.map(v => `<option value="${escapeHtml(v.value)}" ${v.value===selected ? "selected":""}>${escapeHtml(v.label)}</option>`).join("");
+    }
+
+
+    function renderFilters(){
+      const v = state.view;
+      const d = state.draft[v];
+
+      // dynamic values
+      const groups = Array.from(new Set(DB.Post.map(p => p.GroupName))).sort();
+      const groupOptions = [{value:"all", label:"All groups"}, ...groups.map(g => ({value:g, label:g}))];
+
+      const langOptions = [
+        {value:"all", label:"All languages"},
+        {value:"English", label:"English"},
+        {value:"Hebrew", label:"Hebrew"},
+        {value:"Russian", label:"Russian"},
+        {value:"Arabic", label:"Arabic"},
+        {value:"Mixed", label:"Mixed"},
+        {value:"Unknown", label:"Unknown"},
+      ];
+
+      const sellBuyOptions = [
+        {value:"all", label:"All"},
+        {value:"sell", label:"Sell"},
+        {value:"buy", label:"Buy"},
+        {value:"unknown", label:"Unknown"},
+      ];
+
+      const statusOptions = [
+        {value:"all", label:"All"},
+        {value:0, label:"New"},
+        // {value:1, label:"Not relevant"},
+        {value:2, label:"Response expected"},
+        {value:3, label:"Negative response"},
+        {value:4, label:"Positive response"},
+      ];
+
+      // for price slider ranges
+      const prices = [];
+      if(v === "posts"){
+        for(const p of DB.Post){ if(p.Price && p.Price>0) prices.push(p.Price); }
+      } else if(v === "comments"){
+        for(const c of DB.Comment){ if(c.Price && c.Price>0) prices.push(c.Price); }
+      }
+      const minP = prices.length ? Math.min(...prices) : 0;
+      const maxP = prices.length ? Math.max(...prices) : 600000;
+
+      // initialize draft min/max if null
+      if((v==="posts" || v==="comments") && (d.priceMin === null || d.priceMax === null)){
+        d.priceMin = minP;
+        d.priceMax = maxP;
+      }
+
+      // user focus pill
+      const focus = state.userFocus;
+      if(focus && (v==="posts" || v==="comments")){
+        $("userFocusPill").style.display = "";
+        $("userFocusPill").innerHTML = `User focus: <strong>${escapeHtml(focus.UserName)}</strong> <button class="miniBtn" data-action="clearUserFocus" style="margin-left:8px;">Clear</button>`;
+      } else {
+        $("userFocusPill").style.display = "none";
+        $("userFocusPill").innerHTML = "";
+      }
+
+      const filtersEl = $("filters");
+      if(v !== "all"){
+        filtersEl.innerHTML = "";
+        return;
+      }
+
+      function helpIcon(text){
+        return `<span class="help" data-tooltip="${escapeHtml(text)}">?</span>`;
+      }
+
+      if(v === "users"){
+        filtersEl.innerHTML = `
+          <div class="filterRow">
+            <div class="field wide">
+              <label>User search ${helpIcon("Search by user name, user ID, or profile URL.")}</label>
+              <input class="input" id="f_users_q" value="${escapeHtml(d.q)}" placeholder="Type a name, ID, or URL" />
+            </div>
+          </div>
+
+          <div class="filterRow">
+            <div class="field small">
+              <label>Status ${helpIcon("Show contacted or not contacted users.")}</label>
+              <select id="f_users_status">
+                ${selectOptions(statusOptions, d.status)}
+              </select>
+            </div>
+            <div class="field small">
+              <label>Sell / Buy ${helpIcon("Show users who have at least one post/comment matching Sell or Buy.")}</label>
+              <select id="f_users_sellBuy">${selectOptions(sellBuyOptions, d.sellBuy)}</select>
+            </div>
+
+            <div class="field small">
+              <label>Comments min ${helpIcon("Minimum total comments from this user.")}</label>
+              <input class="input" id="f_users_minComms" value="${escapeHtml(d.minComms)}" placeholder="e.g. 1" />
+            </div>
+            <div class="field small">
+              <label>Comments max</label>
+              <input class="input" id="f_users_maxComms" value="${escapeHtml(d.maxComms)}" placeholder="e.g. 30" />
+            </div>
+          </div>
+
+          <div class="filterRow">
+            <div class="field small">
+              <label>Sort ${helpIcon("Default is newest users first (based on latest post/comment date).")}</label>
+              <select id="f_users_sort">
+                <option value="newest" ${d.sort==="newest"?"selected":""}>Newest first</option>
+                <option value="oldest" ${d.sort==="oldest"?"selected":""}>Oldest first</option>
+                <option value="activity_desc" ${d.sort==="activity_desc"?"selected":""}>Activity high -> low</option>
+                <option value="activity_asc" ${d.sort==="activity_asc"?"selected":""}>Activity low -> high</option>
+                <option value="posts_desc" ${d.sort==="posts_desc"?"selected":""}>Posts high -> low</option>
+                <option value="posts_asc" ${d.sort==="posts_asc"?"selected":""}>Posts low -> high</option>
+                <option value="comms_desc" ${d.sort==="comms_desc"?"selected":""}>Comments high -> low</option>
+                <option value="comms_asc" ${d.sort==="comms_asc"?"selected":""}>Comments low -> high</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label>Language ${helpIcon("Detects the dominant alphabet in user's content (English/Hebrew/Russian/Arabic).")}</label>
+              <select id="f_users_lang">${selectOptions(langOptions, d.lang)}</select>
+            </div>
+          </div>
+        `;
+        } else if(v === "posts"){
+          filtersEl.innerHTML = `
+          <div class="filterRow">
+            <div class="field wide">
+              <label>Search text / tags ${helpIcon("Search inside post text and tags.")}</label>
+              <input class="input" id="f_posts_q" value="${escapeHtml(d.q)}" placeholder="Type keywords from the post or tags…" />
+            </div>
+            <div class="field small">
+              <label>Location search ${helpIcon("Type a location name to filter posts by location.")}</label>
+              <input class="input" id="f_posts_Location" value="${escapeHtml(d.city)}" placeholder="e.g. Netanya" />
+            </div>
+          </div>
+
+          <div class="filterRow">
+            <div class="field small">
+              <label>Status</label>
+              <select id="f_posts_status">
+                ${selectOptions(statusOptions, d.status)}
+              </select>
+            </div>
+            <div class="field small">
+              <label>Sell / Buy</label>
+              <select id="f_posts_sellBuy">${selectOptions(sellBuyOptions, d.sellBuy)}</select>
+            </div>
+
+            <div class="field small">
+              <label>Group ${helpIcon("Filter posts by Facebook group.")}</label>
+              <select id="f_posts_group">${selectOptions(groupOptions.map(g=>({value:g.value,label:g.label})), d.group)}</select>
+            </div>
+
+            <div class="field">
+              <label>Price range (₪) ${helpIcon("Filter by extracted or estimated price.")}</label>
+              <div class="rangeWrap">
+                <input id="f_posts_priceMin" type="range" min="${minP}" max="${maxP}" step="5000" value="${d.priceMin}" />
+                <span class="rangeVal" id="f_posts_priceMinVal">${formatNis(d.priceMin)}</span>
+                <span class="cellMuted">–</span>
+                <input id="f_posts_priceMax" type="range" min="${minP}" max="${maxP}" step="5000" value="${d.priceMax}" />
+                <span class="rangeVal" id="f_posts_priceMaxVal">${formatNis(d.priceMax)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="filterRow">
+            <div class="field small">
+              <label>Sort ${helpIcon("Sort by newest/oldest, land size, or comment count.")}</label>
+              <select id="f_posts_sort">
+                <option value="newest" ${d.sort==="newest"?"selected":""}>Newest</option>
+                <option value="oldest" ${d.sort==="oldest"?"selected":""}>Oldest</option>
+                <option value="land_desc" ${d.sort==="land_desc"?"selected":""}>Land size high → low</option>
+                <option value="land_asc" ${d.sort==="land_asc"?"selected":""}>Land size low → high</option>
+                <option value="comments_desc" ${d.sort==="comments_desc"?"selected":""}>Comments high → low</option>
+                <option value="comments_asc" ${d.sort==="comments_asc"?"selected":""}>Comments low → high</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label>Language ${helpIcon("Detects language from post text.")}</label>
+              <select id="f_posts_lang">${selectOptions(langOptions, d.lang)}</select>
+            </div>
+          </div>
+        `;
+        } else if(v === "comments"){
+          filtersEl.innerHTML = `
+          <div class="filterRow">
+            <div class="field wide">
+              <label>Search text / tags ${helpIcon("Search inside comment text, related post text, and tags.")}</label>
+              <input class="input" id="f_comments_q" value="${escapeHtml(d.q)}" placeholder="Type keywords from the comment, post, or tags…" />
+            </div>
+            <div class="field small">
+              <label>Location search</label>
+              <input class="input" id="f_comments_Location" value="${escapeHtml(d.city)}" placeholder="e.g. Haifa" />
+            </div>
+          </div>
+
+          <div class="filterRow">
+            <div class="field small">
+              <label>Status</label>
+              <select id="f_comments_status">
+                ${selectOptions(statusOptions, d.status)}
+              </select>
+            </div>
+            <div class="field small">
+              <label>Sell / Buy</label>
+              <select id="f_comments_sellBuy">${selectOptions(sellBuyOptions, d.sellBuy)}</select>
+            </div>
+
+            <div class="field">
+              <label>Price range (₪)</label>
+              <div class="rangeWrap">
+                <input id="f_comments_priceMin" type="range" min="${minP}" max="${maxP}" step="5000" value="${d.priceMin}" />
+                <span class="rangeVal" id="f_comments_priceMinVal">${formatNis(d.priceMin)}</span>
+                <span class="cellMuted">–</span>
+                <input id="f_comments_priceMax" type="range" min="${minP}" max="${maxP}" step="5000" value="${d.priceMax}" />
+                <span class="rangeVal" id="f_comments_priceMaxVal">${formatNis(d.priceMax)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="filterRow">
+            <div class="field small">
+              <label>Sort</label>
+              <select id="f_comments_sort">
+                <option value="newest" ${d.sort==="newest"?"selected":""}>Newest</option>
+                <option value="oldest" ${d.sort==="oldest"?"selected":""}>Oldest</option>
+                <option value="land_desc" ${d.sort==="land_desc"?"selected":""}>Land size high → low</option>
+                <option value="land_asc" ${d.sort==="land_asc"?"selected":""}>Land size low → high</option>
+              </select>
+            </div>
+
+            <div class="field small">
+              <label>Language</label>
+              <select id="f_comments_lang">${selectOptions(langOptions, d.lang)}</select>
+            </div>
+          </div>
+        `;
+        } else {
+          filtersEl.innerHTML = "";
+        }
+
+        wireFilterInputs();
+        updateDirtyBadge();
+      }
+
+    function updateDirtyBadge(){
+      $("dirtyBadge").style.display = "none";
+    }
+
+    function readDraftFromInputs(){
+      const v = state.view;
+      const d = state.draft[v];
+
+      function val(id){ const el = document.getElementById(id); return el ? el.value : ""; }
+
+      if(v === "users"){
+        d.q = val("f_users_q");
+        d.status = $("f_users_status")?.value ?? "all";
+        d.sellBuy = val("f_users_sellBuy");
+        d.minComms = val("f_users_minComms");
+        d.maxComms = val("f_users_maxComms");
+        d.sort = val("f_users_sort");
+        d.lang = val("f_users_lang");
+      } else if(v === "posts"){
+        d.q = val("f_posts_q");
+        d.city = val("f_posts_Location");
+        d.status = $("f_posts_status").value;
+        d.sellBuy = val("f_posts_sellBuy") === "all"
+        ? ["sell","buy","unknown"]
+        : [val("f_posts_sellBuy")];
+        d.group = val("f_posts_group");
+        d.sort = val("f_posts_sort");
+        d.lang = val("f_posts_lang");
+        d.priceMin = Number(val("f_posts_priceMin"));
+        d.priceMax = Number(val("f_posts_priceMax"));
+        if(d.priceMin > d.priceMax){ const tmp=d.priceMin; d.priceMin=d.priceMax; d.priceMax=tmp; }
+      } else if(v === "comments"){
+        d.q = val("f_comments_q");
+        d.city = val("f_comments_Location");
+        d.contacted = val("f_comments_contacted");
+        d.sellBuy = val("f_comments_sellBuy");
+        d.sort = val("f_comments_sort");
+        d.lang = val("f_comments_lang");
+        d.priceMin = Number(val("f_comments_priceMin"));
+        d.priceMax = Number(val("f_comments_priceMax"));
+        if(d.priceMin > d.priceMax){ const tmp=d.priceMin; d.priceMin=d.priceMax; d.priceMax=tmp; }
+        } else { // all
+          state.draft.all = JSON.parse(JSON.stringify(state.applied.all));
+        }
+      }
+
+    function wireFilterInputs(){
+      // Update draft on input change, but do NOT render table until Apply is clicked.
+      const filtersRoot = $("filters");
+      filtersRoot.querySelectorAll("input, select").forEach(el => {
+        el.addEventListener("input", () => {
+          readDraftFromInputs();
+          syncPriceLabels();
+          updateDirtyBadge();
+        });
+        el.addEventListener("change", () => {
+          readDraftFromInputs();
+          syncPriceLabels();
+          updateDirtyBadge();
+        });
+      });
+
+      // price labels init
+      syncPriceLabels();
+    }
+
+    function syncPriceLabels(){
+      const v = state.view;
+      if(v === "posts"){
+        const d = state.draft.posts;
+        const minEl = document.getElementById("f_posts_priceMinVal");
+        const maxEl = document.getElementById("f_posts_priceMaxVal");
+        if(minEl) minEl.textContent = formatNis(d.priceMin);
+        if(maxEl) maxEl.textContent = formatNis(d.priceMax);
+      }
+      if(v === "comments"){
+        const d = state.draft.comments;
+        const minEl = document.getElementById("f_comments_priceMinVal");
+        const maxEl = document.getElementById("f_comments_priceMaxVal");
+        if(minEl) minEl.textContent = formatNis(d.priceMin);
+        if(maxEl) maxEl.textContent = formatNis(d.priceMax);
+      }
+    }
+
+function resetFilters(){
+  const v = state.view;
+
+  if(!state.defaults || !state.defaults[v]){
+    console.warn("No defaults for view:", v);
+    return;
+  }
+
+  state.draft[v]   = structuredClone(state.defaults[v]);
+  state.applied[v] = structuredClone(state.defaults[v]);
+  state.pagination[v].page = 1;
+  state.userFocus = null;
+  state.postFocus = null;
+
+  const search = document.getElementById("globalSearch");
+  if(search) search.value = "";
+
+  render();
+}
+
+
+    function formatNis(n){
+      const x = Number(n || 0);
+      if(!x) return "0";
+      return x.toLocaleString("en-US");
+    }
+
+    // ------------------------
+    // Data building
+    // ------------------------
+    function buildAllRows(){
+      const rows = [];
+      for (const p of DB.Post) {
+        const u = userById(p.UserID);
+        const g = GroupById(p.GroupID);
+
+        const userName =
+          typeof u?.UserName === "string" && u.UserName.trim()
+            ? u.UserName
+            : "Anonymous";
+
+        rows.push({
+          Type: "post",
+
+          // AUTHOR OF ROW
+          UserID: p.UserID,
+          UserName: userName,
+          ProfileURL: u?.ProfileURL || "",
+
+          // POST DATA
+          PostID: p.PostID,
+          PostText: p.TextPost || "",
+          PostURL: p.Posturl || "",
+
+          GroupID: p.GroupID || "",
+          GroupName: g?.GroupName || "-",
+          GroupURL: g?.GroupURL || "#",
+
+          City: p.City || "-",
+          LandSize: p.LandSize || 0,
+          Price: p.Price || 0,
+
+          SellOrBuy: (p.SellBuy || p.SellOrBuy || inferSellBuyFromText(p.TextPost) || "unknown").toLowerCase(),
+
+          Contacts: p.Contacts || "",
+          DateISO: p.PostDate,
+          notes: p.notes || "",
+          trash: p.trash || "",
+
+
+          Language: detectLanguage(p.TextPost + " " + (p.Tags || "")),
+        });
+      }
+      for(const g of DB.Group){
+        rows.push({
+          Type: "group",
+          UserID: g.GroupID,
+          GroupName: g.GroupName || "",
+          GroupURL: g.GroupURL || "",
+        });
+      }
+      for (const c of DB.Comment) {
+
+  const p = postById(c.PostID);
+  if (!p) continue; // ⬅️ обязательно
+
+  const g = GroupById(p.GroupID);
+
+  // -------- COMMENT AUTHOR --------
+  const commentAuthorId =
+    c.CommentUserID ?? c.CommenterID ?? c.UserID ?? "";
+
+  const commentAuthorUser = userById(commentAuthorId);
+
+  const commentAuthorName =
+    (typeof c?.UserName === "string" && c.UserName.trim())
+      ? c.UserName.trim()
+      : (typeof commentAuthorUser?.UserName === "string" && commentAuthorUser.UserName.trim())
+        ? commentAuthorUser.UserName.trim()
+        : "Anonymous";
+
+  const commentAuthorProfile =
+    c?.ProfileURL || commentAuthorUser?.ProfileURL || "";
+
+  rows.push({
+  Type: "comment",
+
+  // 🔥 УНИФИЦИРОВАННЫЙ АКТЁР СТРОКИ
+  UserID: commentAuthorId,
+  UserName: commentAuthorName,
+  ProfileURL: commentAuthorProfile,
+
+  // (можно оставить если нужно отдельно)
+  CommentUserID: commentAuthorId,
+  CommentUserName: commentAuthorName,
+  CommentProfileURL: commentAuthorProfile,
+
+  PostOwnerID: p.UserID || "",
+
+  // COMMENT DATA
+  CommentID: c.CommentID,
+  Text: c.TextComment || "",
+  DateISO: c.CommentDate,
+
+  // POST DATA
+  PostID: p.PostID,
+  PostText: p.TextPost || "",
+  PostURL: p.Posturl || "",
+
+  GroupID: p.GroupID || "",
+  GroupName: g?.GroupName || "-",
+  GroupURL: g?.GroupURL || "#",
+
+  City: c.City || p.City || "-",
+  LandSize: c.LandSize || p.LandSize || 0,
+  Price: c.Price || p.Price || 0,
+
+  SellOrBuy: (
+    c.SellBuy ||
+    c.SellOrBuy ||
+    inferSellBuyFromText(c.TextComment) ||
+    "unknown"
+  ).toLowerCase(),
+
+  Contacts: c.Contacts || "",
+  notes: c.notes || "",
+
+
+  Language: detectLanguage(c.TextComment + " " + (c.Tags || "")),
+});
+      }
+
+      return rows;
+    }
+
+    function commentById(CommentID){
+      return DB.Comment.find(c => c.CommentID === CommentID) || null;
+    }
+
+    function getAllRowSources(row){
+      if(!row) return { post:null, comment:null };
+
+      if(row.Type === "post"){
+        return { post: postById(row.PostID), comment: null };
+      }
+
+      if(row.Type === "comment"){
+        return {
+          post: postById(row.PostID),
+          comment: commentById(row.CommentID),
+        };
+      }
+
+      return { post:null, comment:null };
+    }
+
+
+    function getAllRowCity(row){
+      const { post, comment } = getAllRowSources(row);
+      return comment?.City || post?.City || "-";
+    }
+
+    function getAllRowLand(row){
+      const { post, comment } = getAllRowSources(row);
+      return Number(comment?.LandSize || post?.LandSize || 0);
+    }
+
+    function getAllRowPrice(row){
+      const { post, comment } = getAllRowSources(row);
+      return Number(comment?.Price || post?.Price || 0);
+    }
+
+    function getAllRowHasContacts(row){
+      const { post, comment } = getAllRowSources(row);
+      const src = comment || post;
+      if(!src) return false;
+      const c = extractContacts(src);
+      return Boolean(c?.phone || c?.email);
+    }
+
+    function getAllCities(){
+      const set = new Set();
+      for(const p of DB.Post){ if(p.City) set.add(p.City); }
+      for(const c of DB.Comment){ if(c.City) set.add(c.City); }
+      return Array.from(set).sort((a,b) => a.localeCompare(b, "en", { sensitivity:"base" }));
+    }
+
+    function getPostCities(){
+      const set = new Set();
+      for(const p of DB.Post){ if(p.City) set.add(p.City); }
+      return Array.from(set).sort((a,b) => a.localeCompare(b, "en", { sensitivity:"base" }));
+    }
+
+    function getCommentCities(){
+      const set = new Set();
+      for(const c of DB.Comment){ if(c.City) set.add(c.City); }
+      return Array.from(set).sort((a,b) => a.localeCompare(b, "en", { sensitivity:"base" }));
+    }
+
+    function ensurePostsFilters(){
+      if(!state.applied.posts) state.applied.posts = {};
+      const f = state.applied[state.view] || state.applied.posts;
+      if(!Array.isArray(f.sellBuy)) f.sellBuy = ["sell","buy","unknown"];
+      if(!Array.isArray(f.cities)) f.cities = [];
+      if(!f.dateSort) f.dateSort = "newest";
+      if(!f.citySort) f.citySort = "none";
+      if(!f.landSort) f.landSort = "none";
+      if(!f.priceSort) f.priceSort = "none";
+      if(!f.commentsSort) f.commentsSort = "none";
+      if(f.priceMin === undefined) f.priceMin = "";
+      if(f.priceMax === undefined) f.priceMax = "";
+      if(!f.contacts) f.contacts = "all";
+      if(!f.status) f.status = "all";
+      state.draft.posts = JSON.parse(JSON.stringify(f));
+    }
+
+function ensureCommentsFilters(){
+
+  if(!state.applied.comments)
+    state.applied.comments = {};
+
+  const f = state.applied.comments;
+
+  if(!Array.isArray(f.sellBuy))
+    f.sellBuy = ["sell","buy","unknown"];
+
+  if(!Array.isArray(f.cities))
+    f.cities = [];
+
+  if(!f.dateSort)
+    f.dateSort = "newest";
+
+  if(!f.citySort)
+    f.citySort = "none";
+
+  if(!f.landSort)
+    f.landSort = "none";
+
+  if(!f.priceSort)
+    f.priceSort = "none";
+
+  if(f.priceMin === undefined)
+    f.priceMin = "";
+
+  if(f.priceMax === undefined)
+    f.priceMax = "";
+
+  if(!f.contacts)
+    f.contacts = "all";
+
+  if(!Array.isArray(f.status))
+    f.status = [0,1,2,3,4];
+
+  state.postFocus = null;   // 🔥 ВОТ ЭТО ГЛАВНОЕ
+
+  state.draft.comments = JSON.parse(JSON.stringify(f));
+}
+
+
+    // ------------------------
+    // Filter predicates
+    // ------------------------
+    function matchesContactedFilter(UserID, contacted){
+      if(contacted === "all") return true;
+      const is = getContacted(UserID);
+      return contacted === "yes" ? is : !is;
+    }
+
+    function matchesSellBuyFilter(value, sellBuy){
+      if(sellBuy === "all") return true;
+      return (value || "unknown").toLowerCase() === sellBuy;
+    }
+
+    function matchesSellBuySet(value, set){
+      if(!Array.isArray(set) || set.length === 0) return true;
+      return set.includes((value || "unknown").toLowerCase());
+    }
+
+    function hasContactsObj(obj){
+      return Boolean(obj?.phone || obj?.email);
+    }
+
+    function postHasContacts(post){
+      return hasContactsObj(extractContacts(post));
+    }
+
+    function commentHasContacts(comment){
+      return hasContactsObj(extractContacts(comment));
+    }
+
+    function containsInsensitive(hay, needle){
+      if(!needle) return true;
+      return String(hay || "").toLowerCase().includes(String(needle).toLowerCase());
+    }
+
+    function numInRange(n, minStr, maxStr){
+      const min = minStr === "" ? null : Number(minStr);
+      const max = maxStr === "" ? null : Number(maxStr);
+      const val = Number(n ?? 0);
+      if(min !== null && val < min) return false;
+      if(max !== null && val > max) return false;
+      return true;
+    }
+
+    // ------------------------
+    // Pagination helpers
+    // ------------------------
+function paginateRows(rows){
+  const view = state.view || "all";
+  const pg = state.pagination[view] || state.pagination.all;
+
+  const page = Math.max(1, Number(pg.page || 1));
+  const pageSize = Math.max(1, Number(pg.pageSize || 50));
+
+  const start = (page - 1) * pageSize;
+  const out = rows.slice(start, start + pageSize);
+
+  console.log("[paginateRows]", { view, page, pageSize, total: rows.length, start, out: out.length });
+  return out;
+}
+
+
+    function getPageOffset(view){
+      const p = state.pagination[view];
+      return (p.page - 1) * p.pageSize;
+    }
+
+    // ------------------------
+    // Rendering
+    // ------------------------
+    function setPageHeader(){
+      const titleMap = {
+        all: { title: "All", subtitle: "Unified backlog view of posts and comments across Facebook groups" },
+        users: { title: "Users", subtitle: "People who post and comment in Facebook groups" },
+        posts: { title: "Posts", subtitle: "All captured posts from Facebook groups" },
+        comments: { title: "Comments", subtitle: "All captured comments linked to posts" },
+        dashboard: {title: "Dashboard", subtitle: "Analytics"},
+        trash: { title: "Posts", subtitle: "All captured trash from Facebook groups" },
+      };
+      $("pageTitle").textContent = titleMap[state.view].title;
+      $("pageSubtitle").textContent = titleMap[state.view].subtitle;
+    }
+
+      function renderMeta(count){
+        const viewLabel = state.view[0].toUpperCase() + state.view.slice(1);
+
+        $("meta").innerHTML = `
+          <strong>${escapeHtml(viewLabel)}</strong>
+          <span class="cellMuted">•</span>
+          <span>${count.toLocaleString()} row(s)</span>
+          <span class="cellMuted">•</span>
+          <span class="cellMuted">
+            Filters apply only after you click <strong>Apply</strong>
+          </span>
+        `;
+      }
+
+    function renderPagination(total){
+  const view = state.view || "all";
+  const bar = document.getElementById("paginationBar");
+  if(!bar) return;
+
+  const pg = state.pagination[view] || state.pagination.all;
+  const pageSize = Math.max(1, Number(pg.pageSize || 50));
+  const totalPages = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
+
+  // если после фильтра текущая страница стала больше доступных — откатим
+  if(pg.page > totalPages) pg.page = 1;
+
+  const page = Math.max(1, Number(pg.page || 1));
+
+  console.log("[renderPagination]", { view, total, page, pageSize, totalPages });
+
+  bar.innerHTML = `
+    <label class="cellMuted">Rows:</label>
+
+    <select class="input small" id="pageSizeSelect">
+      <option value="50"  ${pageSize==50?"selected":""}>50</option>
+      <option value="100" ${pageSize==100?"selected":""}>100</option>
+      <option value="500" ${pageSize==500?"selected":""}>500</option>
+    </select>
+
+    <button class="btn small" id="prevPage" ${page<=1?"disabled":""}>←</button>
+    <span class="cellMuted">${page} / ${totalPages}</span>
+    <button class="btn small" id="nextPage" ${page>=totalPages?"disabled":""}>→</button>
+  `;
+
+  document.getElementById("pageSizeSelect").onchange = e => {
+    pg.pageSize = Number(e.target.value);
+    pg.page = 1;
+    render();
+  };
+
+  document.getElementById("prevPage").onclick = () => {
+    if(pg.page > 1){
+      pg.page--;
+      render();
+    }
+  };
+
+  document.getElementById("nextPage").onclick = () => {
+    if(pg.page < totalPages){
+      pg.page++;
+      render();
+    }
+  };
+}
+
+
+
+
+
+    function activeFiltersLabel(){
+      const v = state.view;
+      const f = state.applied[v];
+      const parts = [];
+
+      if(v === "users"){
+        if(f.q) parts.push(`Search: "${f.q}"`);
+        if(f.contacted !== "all") parts.push(`Contacted: ${f.contacted === "yes" ? "Yes" : "No"}`);
+        if(f.sellBuy !== "all") parts.push(`Intent: ${friendlySellBuy(f.sellBuy)}`);
+        if(f.minComms || f.maxComms) parts.push(`Comments: ${f.minComms||"-"}-${f.maxComms||"-"}`);
+        if(f.lang !== "all") parts.push(`Lang: ${f.lang}`);
+      } else if(v === "posts"){
+        if(f.q) parts.push(`Search: "${f.q}"`);
+        if(f.city) parts.push(`Location: "${f.city}"`);
+        if(f.group !== "all") parts.push(`Group: "${f.group}"`);
+        if(f.contacted !== "all") parts.push(`Contacted: ${f.contacted === "yes" ? "Yes" : "No"}`);
+        if(f.sellBuy !== "all") parts.push(`Intent: ${friendlySellBuy(f.sellBuy)}`);
+        if(f.priceMin !== null && f.priceMax !== null) parts.push(`Price: ₪${formatNis(f.priceMin)}-₪${formatNis(f.priceMax)}`);
+        if(f.lang !== "all") parts.push(`Lang: ${f.lang}`);
+      } else if(v === "comments"){
+        if(f.q) parts.push(`Search: "${f.q}"`);
+        if(f.city) parts.push(`Location: "${f.city}"`);
+        if(f.contacted !== "all") parts.push(`Contacted: ${f.contacted === "yes" ? "Yes" : "No"}`);
+        if(f.sellBuy !== "all") parts.push(`Intent: ${friendlySellBuy(f.sellBuy)}`);
+        if(f.priceMin !== null && f.priceMax !== null) parts.push(`Price: ₪${formatNis(f.priceMin)}-₪${formatNis(f.priceMax)}`);
+        if(f.lang !== "all") parts.push(`Lang: ${f.lang}`);
+        } else if(v === "dashboard"){
+          return "";
+         } else {
+          const sellSet = Array.isArray(f.sellBuy) ? f.sellBuy : [];
+          if(sellSet.length && sellSet.length < 3){
+            parts.push(`Intent: ${sellSet.map(v => friendlySellBuy(v)).join(", ")}`);
+          }
+          if(f.cities && f.cities.length) parts.push(`Location: ${f.cities.join(", ")}`);
+          if(f.citySort && f.citySort !== "none") parts.push(`Location sort: ${f.citySort === "asc" ? "A-Z" : "Z-A"}`);
+          if(f.landSort && f.landSort !== "none") parts.push(`Land: ${f.landSort}`);
+          if(f.priceSort && f.priceSort !== "none") parts.push(`Price: ${f.priceSort}`);
+          if(f.priceMin || f.priceMax) parts.push(`Price range: ${f.priceMin||"-"}-${f.priceMax||"-"}`);
+          if(f.contacts !== "all") parts.push(`Contacts: ${f.contacts === "yes" ? "Yes" : "No"}`);
+          if(f.contacted !== "all") parts.push(`Contacted: ${f.contacted === "yes" ? "Yes" : "No"}`);
+        }
+
+      if(parts.length === 0) return "Filters: -";
+      return "Filters: " + parts.join(" | ");
+    }
+    function help(text){
+      return `<span class="thHelp" data-tooltip="${escapeHtml(text)}"></span>`;
+    }
+
+    function renderFilterBtn(id, active=false){
+      const cls = active ? "filterBtn active" : "filterBtn";
+      return `
+        <button class="${cls}" data-filter-btn="${id}" aria-label="Filter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 3H2l8 9v7l4 2v-9l8-9z"/>
+          </svg>
+        </button>
+      `;
+    }
+
+    function renderFilterPopover(id, title, bodyHtml){
+      return `
+        <div class="filterPopover" data-filter-panel="${id}">
+          <div class="filterTitle">${escapeHtml(title)}</div>
+          ${bodyHtml}
+          <div class="filterActions">
+            <button class="btn small ghost" data-filter-cancel="${id}">Cancel</button>
+            <button class="btn small" data-filter-apply="${id}">Apply</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function typeIcon(type){
+      if(type === "post"){
+        return `
+          <span class="typeIcon" title="Post">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 3h12v18H6z"/>
+              <path d="M6 7h12"/>
+              <path d="M9 11h6"/>
+              <path d="M9 15h6"/>
+              <path d="M4 7v13a1 1 0 0 0 1 1h13"/>
+            </svg>
+          </span>
+        `;
+      }
+      return `
+        <span class="typeIcon" title="Comment">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5z"/>
+          </svg>
+        </span>
+      `;
+    }
+
+    function openLinkButton(url){
+      const safe = escapeHtml(url);
+      return `<a class="entityName openLink" href="${safe}" target="_blank" rel="noopener" title="${safe}">Open link</a>`;
+    }
+
+
+function normalizeContactsValue(value){
+  if(!value) return [];
+  if(Array.isArray(value)) return value;
+  if(typeof value === "string"){
+    return value.split(",").map(v => v.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+
+function extractContacts(entity){
+  const raw = entity.Contacts || entity.contacts || "";
+  if(!raw) return null;
+
+  const phones = raw.match(/(?:\+972|0)\d{8,9}/g) || [];
+  const emails = raw.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) || [];
+  const webs   = raw.match(/https?:\/\/[^\s,]+/gi) || [];
+
+  return {
+    phone: [...new Set(phones)],
+    email: [...new Set(emails)],
+    web:   [...new Set(webs)]
+  };
+}
+
+
+function renderContactsCell(entity){
+  const c = extractContacts(entity);
+  if(!c){
+    return `<span class="cellMuted">-</span>`;
+  }
+
+  const phones = normalizeContactsValue(c.phone);
+  const emails = normalizeContactsValue(c.email);
+  const webs   = normalizeContactsValue(c.web);
+
+  if(!phones.length && !emails.length && !webs.length){
+    return `<span class="cellMuted">-</span>`;
+  }
+
+  const preview = [];
+
+  // ✔ показываем реальные номера
+  if(phones.length){
+    preview.push(phones.join(", "));
+  }
+
+  // ✔ email / web — как типы, не как шум
+  if(emails.length){
+    preview.push("Email");
+  }
+
+  if(webs.length){
+    preview.push("Website");
+  }
+
+  return `
+    <span class="cellClick"
+      data-action="openContacts"
+      data-contacts='${escapeHtml(JSON.stringify({
+        phone: phones,
+        email: emails,
+        web: webs
+      }))}'>
+      ${preview.join(", ")}
+    </span>
+  `;
+}
+
+
+
+function renderContactedButton(UserID){
+  const u = userById(UserID);
+  if(!u) return "-";
+
+  const status = Number(u.Contacted ?? 0);
+  const label = USER_STATUS[status] || "New";
+
+  return `
+    <button 
+      class="contactPill status-${status}"
+      data-action="changeStatus"
+      data-user="${escapeHtml(UserID)}">
+      ${escapeHtml(label)}
+    </button>
+  `;
+}
+
+
+
+    function renderEntityUser(user, mode="modal"){
+      const displayName =
+        typeof user?.UserName === "string" && user.UserName.trim()
+          ? user.UserName
+          : "Anonymous";
+
+      const profileUrl = user?.ProfileURL || "#";
+
+      const nameHtml = mode === "profileLink"
+        ? `<a href="${escapeHtml(profileUrl)}" target="_blank" rel="noopener"
+            class="entityName">${escapeHtml(displayName)}</a>`
+        : `<span class="cellClick"
+            data-action="openUserDetails"
+            data-user="${escapeHtml(user.UserID)}">${escapeHtml(displayName)}</span>`;
+
+      return `
+        <div class="entity" data-user="${escapeHtml(user.UserID)}">
+          <div class="entityTop">
+            ${nameHtml}
+          </div>
+        </div>
+      `;
+  }
+
+
+  function formatFilters(filters) {
+  if (!filters || Object.keys(filters).length === 0) {
+    return "None";
+  }
+
+  return Object.entries(filters)
+    .filter(([_, value]) => value && value.length !== 0)
+    .map(([key, value]) => {
+      if (Array.isArray(value)) {
+        return `${key}: ${value.join(", ")}`;
+      }
+      return `${key}: ${value}`;
+    })
+    .join(" | ");
+}
+
+function getActiveFilterLabels(view) {
+
+  const filters = state.applied?.[view];
+  if (!filters) return [];
+
+  const labels = [];
+
+  // Sell/Buy
+  if (Array.isArray(filters.sellBuy)) {
+
+    const DEFAULT = ["sell", "buy", "unknown"];
+
+    const isDefault =
+      filters.sellBuy.length === DEFAULT.length &&
+      DEFAULT.every(v => filters.sellBuy.includes(v));
+
+    if (!isDefault) {
+      labels.push("Sell/Buy");
+    }
+  }
+
+  if (filters.cities?.length) labels.push("Location");
+  if (filters.contacts && filters.contacts !== "all") labels.push("Contacts");
+  if (filters.contacted && filters.contacted !== "all") labels.push("Contacted");
+
+  if (filters.status && filters.status.length > 0 && filters.status.length < 5) {
+    labels.push("Status");
+  }
+
+  if (filters.priceMin || filters.priceMax) labels.push("Price");
+  
+  return labels;
+}
+
+
+  function openExportModal() {
+
+  const view = state.view;
+
+  const FIELDS = {
+      all: [
+      "Type",
+      "TextPost",
+      "TextComment",
+      "UserName",
+      "ProfileURL",
+      "Intent",
+      "Location",
+      "Price",
+      "Contacts",
+      "Status",
+      "notes"
+    ],
+    posts: [
+      "TextPost","Posturl","CommentsCount","UserName","ProfileURL",
+      "UserID","PostDate","SellBuy","Location","LandSize",
+      "Price","Contacts","Contacted",
+      "notes"
+    ],
+    comments: [
+      "TextComment","TextPost","PostURL","UserName","ProfileURL",
+      "UserID","CommentDate","SellBuy","Location","LandSize",
+      "Price","Contacts",
+      "notes"
+    ],
+    users: [
+      "UserName","ProfileURL","UserID","PostsAllCount",
+      "CommsAllCount","Activity","Contacts","Contacted"
+    ]
+  };
+
+  const availableFields = FIELDS[view];
+
+  const options = availableFields.map(f => `
+    <option value="${f}">${f}</option>
+  `).join("");
+
+
+  const activeFilters = getActiveFilterLabels(state.view);
+
+
+  const html = `
+<div class="export-container">
+
+  ${activeFilters.length ? `
+  <div class="export-active-filters">
+    <div class="label">Active filters</div>
+    <div class="chips">
+      ${activeFilters.map(f => `<span class="chip">${f}</span>`).join("")}
+    </div>
+  </div>
+  ` : ""}
+
+  <div class="export-grid">
+
+    <div class="export-label">Format</div>
+    <div class="export-value">CSV</div>
+
+    <div class="export-label">Select fields (optional)</div>
+    <div class="export-field-wrapper">
+      <select id="exportFields">
+        ${options}
+      </select>
+    </div>
+
+  </div>
+
+  <div class="export-footer">
+    <button class="btn primary" onclick="downloadExportClean()">
+      Download
+    </button>
+  </div>
+
+</div>
+`;
+
+
+
+
+openModal({
+  title: "Export dataset",
+  metaLineHtml: html,
+  blocks: [],
+  buttons: []
+});
+
+// ⚠️ Инициализация ТОЛЬКО ПОСЛЕ openModal
+requestAnimationFrame(() => {
+
+  const el = document.querySelector("#exportFields");
+
+  if (!el) {
+    console.log("Select not found");
+    return;
+  }
+
+  // если открываем модалку повторно
+  if (el.tomselect) {
+    el.tomselect.destroy();
+  }
+
+  new TomSelect(el, {
+    plugins: ['remove_button'],
+    maxItems: null,
+    placeholder: "All fields included",
+    create: false
+  });
+})
+}
+
+
+async function downloadExportClean() {
+
+  const select = document.getElementById("exportFields");
+  const selected = [...select.selectedOptions].map(o => o.value);
+
+  const fields = selected.length === 0 ? null : selected;
+
+  const view = state.view;
+  let filteredRows = [];
+
+    if (view === "all") {
+    const posts = applyPostsFilters(DB.Post);
+    const comments = applyCommentsFilters(DB.Comment);
+
+    filteredRows = [
+      ...posts.map(p => ({
+        Type: "post",
+        TextPost: p.TextPost ?? p.PostText ?? p.Post ?? "",
+        TextComment: "",
+        UserName: p.UserName ?? "",
+        ProfileURL: p.ProfileURL ?? "",
+        Intent: p.SellBuy ?? p.Intent ?? "",
+        City: p.City ?? "",
+        Price: p.Price ?? "",
+        Contacts: p.Contacts ?? "",
+        Status: p.Status ?? "",
+        notes: p.notes ?? ""
+      })),
+      ...comments.map(c => ({
+        Type: "comment",
+        TextPost: c.TextPost ?? c.PostText ?? c.Post ?? "",
+        TextComment: c.TextComment ?? c.Text ?? c.Comments ?? "",
+        UserName: c.UserName ?? "",
+        ProfileURL: c.ProfileURL ?? "",
+        Intent: c.SellBuy ?? c.Intent ?? "",
+        City: c.City ?? "",
+        Price: c.Price ?? "",
+        Contacts: c.Contacts ?? "",
+        Status: c.Status ?? "",
+        notes: c.notes ?? ""
+      })),
+    ];
+  }
+  else if (view === "users") {
+    filteredRows = applyUsersFilters(DB.User);
+  }
+  else if (view === "posts") {
+    filteredRows = applyPostsFilters(DB.Post);
+  }
+  else if (view === "comments") {
+    filteredRows = applyCommentsFilters(DB.Comment);
+  }
+
+  if (!filteredRows.length) {
+    alert("No data to export");
+    return;
+  }
+
+  const token = localStorage.getItem("auth_token");
+
+  const response = await fetch("/export", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({
+      view,
+      rows: filteredRows,
+      fields
+    })
+  });
+
+  if (!response.ok) {
+    alert("Export failed");
+    return;
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+
+  const fileName = buildFileName(view, state.applied[view]);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  window.URL.revokeObjectURL(url);
+}
+
+
+
+function buildFileName(view, filters){
+  const date = new Date().toISOString().split("T")[0];
+
+  let parts = ["Dataset", view, date];
+
+  if(filters.sellBuy?.length === 1){
+    parts.push(filters.sellBuy[0]);
+  }
+
+  return parts.join("_") + ".csv";
+}
+
+    function renderEntityGroup(groupName, groupUrl){
+      return `
+        <div class="entity groupEntity">
+          <div class="entityTop">
+            <a href="${escapeHtml(groupUrl)}" target="_blank" rel="noopener" class="entityName" title="${escapeHtml(groupUrl)}">${escapeHtml(groupName || "—")}</a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderClamped(text, morePayload){
+      const safe = escapeHtml(text || "-");
+      return `
+        <div class="clampCell">
+          <div class="clamp2" data-action="openTextModal" data-payload="${escapeHtml(JSON.stringify(morePayload))}">${safe}</div>
+        </div>
+      `;
+    }
+
+    function renderSummaryBlock(label, text, payload){
+      return `
+        <div class="summaryBlock">
+          <div class="summaryLabel">${escapeHtml(label)}</div>
+          ${renderClamped(text, payload)}
+        </div>
+      `;
+    }
+
+    // After table render, show More button only when text overflows 2 lines
+    function detectOverflowAndToggleMore(){
+      const cells = document.querySelectorAll(".clampCell");
+      cells.forEach(cell => {
+        const clamp = cell.querySelector(".clamp2");
+        if(!clamp) return;
+        // Force layout
+        const over = clamp.scrollHeight > clamp.clientHeight + 2;
+        clamp.classList.toggle("truncated", over);
+      });
+    }
+
+    // Keep the top scrollbar in sync with the main table container
+    function syncScrollbars(){
+      const wrap = $("tableWrap");
+      const top = $("tableScrollTop");
+      const spacer = $("tableScrollSpacer");
+      const table = wrap?.querySelector("table");
+      if(!wrap || !top || !spacer || !table) return;
+
+      spacer.style.width = table.scrollWidth + "px";
+      top.scrollLeft = wrap.scrollLeft;
+      // ensure the top bar stays visible even when content fits; small width keeps scrollbar area usable
+      top.style.display = "block";
+
+      let lock = false;
+      top.onscroll = () => {
+        if(lock) return;
+        lock = true;
+        wrap.scrollLeft = top.scrollLeft;
+        lock = false;
+      };
+      wrap.onscroll = () => {
+        if(lock) return;
+        lock = true;
+        top.scrollLeft = wrap.scrollLeft;
+        lock = false;
+      };
+    }
+
+    // ------------------------
+    // Tables per view
+    // -----------------------
+
+    function safeHide(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = "none";
+}
+
+function safeShow(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = "";
+}
+
+
+    async function renderDashboard(){
+
+  try {
+    const res = await fetch("/api/metabase/embed/dashboard/2"); 
+    const data = await res.json();
+
+    $("tableWrap").innerHTML = `
+      <div style="height:100%;padding:20px;">
+        <iframe
+          src="${data.url}"
+          style="width:100%;height:90vh;border:none;border-radius:12px;">
+        </iframe>
+      </div>
+    `;
+  } catch (err) {
+    console.error("Dashboard load error:", err);
+    $("tableWrap").innerHTML = "<p>Failed to load dashboard</p>";
+  }
+}
+
+
+document.getElementById("toggleTrashBtn").onclick = () => {
+  state.view = "trash";
+  render();
+};
+
+function render(){
+
+  const role = localStorage.getItem("user_role");
+  let view = state.view || "all";
+
+  if (role !== "admin" && view === "dashboard") {
+    view = "all";
+    state.view = "all";
+  }
+
+  console.log("render view:", view);
+
+  setPageHeader();
+
+  // nav active
+  document.querySelectorAll(".navItem").forEach(el => {
+    el.classList.toggle("active", el.dataset.view === view);
+  });
+
+  renderFilters();
+
+  const toolbar = document.querySelector(".tableToolbar");
+  const footer  = document.querySelector(".tableFooter");
+  const main    = document.querySelector(".tableWrap");
+
+  if (toolbar) toolbar.style.display = "";
+  if (footer)  footer.style.display  = "";
+  if (main)    main.style.height = "";
+
+  // ===== DASHBOARD =====
+  if (view === "dashboard") {
+
+    if (toolbar) toolbar.style.display = "none";
+    if (footer)  footer.style.display  = "none";
+    if (main)    main.style.height = "calc(100vh - 120px)";
+
+    renderDashboard();
+    return;
+  }
+
+  safeShow("metaWrap");
+  safeShow("filtersWrap");
+  safeShow("paginationWrap");
+
+  const pill = $("activeFilterPill");
+  if (pill){
+    pill.textContent = activeFiltersLabel();
+    pill.style.display = (view === "all") ? "" : "none";
+  }
+
+  // ===== GET ROWS =====
+  let rows = [];
+
+  if(view === "all"){
+
+    rows = applyAllFilters(
+      buildAllRows().filter(r => {
+
+        if (r.Type === "group") return false;
+
+        // скрываем посты из мусорки
+        if (r.Type === "post") {
+          const post = DB.Post.find(p => String(p.PostID) === String(r.PostID));
+          if (post && Number(post.trash) === 1) return false;
+        }
+
+        return true;
+      })
+    );
+
+  }
+
+  else if(view === "users"){
+
+    rows = applyUsersFilters();
+
+  }
+
+  else if(view === "posts"){
+    const baseRows = DB.Post.filter(p => Number(p.trash) === 0);
+    rows = applyPostsFilters(baseRows, state.applied.posts);
+  }
+
+  else if(view === "comments"){
+
+    rows = applyCommentsFilters();
+
+  }
+
+  else if(view === "trash"){
+    const baseRows = DB.Post.filter(p => Number(p.trash) === 1);
+    rows = applyPostsFilters(baseRows, state.applied.trash);
+  }
+
+  // ===== PAGINATION =====
+  const pg = state.pagination[view] || state.pagination.all;
+
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / pg.pageSize));
+
+  if (pg.page > totalPages){
+    pg.page = totalPages;
+  }
+
+  const start = (pg.page - 1) * pg.pageSize;
+  const end   = start + pg.pageSize;
+
+  const pageRows = rows.slice(start, end);
+
+  console.log("[pagination]", {
+    view,
+    total,
+    page: pg.page,
+    pageSize: pg.pageSize,
+    totalPages
+  });
+
+  // ===== META =====
+  renderMeta(total);
+
+  // ===== TABLE =====
+  if(view === "all"){
+    renderAllTable(pageRows);
+  }
+  else if(view === "users"){
+    renderUsersTable(pageRows);
+  }
+  else if(view === "posts"){
+    renderPostsTable(pageRows);
+  }
+  else if(view === "comments"){
+    renderCommentsTable(pageRows);
+  }
+  else if(view === "trash"){
+    renderPostsTable(pageRows);
+  }
+  else{
+    $("tableWrap").innerHTML = "";
+  }
+
+  // ===== PAGINATION =====
+  renderPagination(total);
+
+}
+
+
+
+function setView(view) {
+  if (state.view === view) return;
+  state.view = view;
+  state.pagination[view].page = 1;
+  render();
+}
+
+function goToPage(page) {
+  state.pagination[state.view].page = page;
+  render();
+}
+
+function matchesStatusFilter(userId, filterValue){
+  if (!filterValue || filterValue === "all")
+    return true;
+
+  const u = userById(userId);
+  if (!u) return false;
+
+  const userStatus = Number(u.Contacted ?? 0);
+
+  if (Array.isArray(filterValue))
+    return filterValue.includes(userStatus);
+
+  return userStatus === Number(filterValue);
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("toggleTrashBtn");
+
+  if (btn) {
+    btn.onclick = () => {
+      console.log("trash click");
+
+      state.view = state.view === "trash" ? "all" : "trash";
+      state.pagination[state.view].page = 1;
+
+      render();
+    };
+  }
+
+});
+
+
+    // ------------------------
+    // Filtering + sorting by view
+    // ------------------------
+function applyAllFilters(rows){
+  const f = state.applied.all || {};
+
+  rows = (Array.isArray(rows) ? rows : [])
+    .filter(r => r && r.Type !== "group");
+
+  // 🔥 USER FOCUS
+  if (state.userFocus) {
+    const focusId = String(state.userFocus.UserID);
+
+    rows = rows.filter(r => {
+      if (state.view === "comments") {
+        return r.Type === "comment" &&
+               String(r.CommentUserID ?? "") === focusId;
+      }
+
+      if (state.view === "all") {
+        if (r.Type === "post")
+          return String(r.UserID ?? "") === focusId;
+
+        if (r.Type === "comment")
+          return String(r.CommentUserID ?? "") === focusId;
+
+        return false;
+      }
+
+      return true;
+    });
+  }
+
+  const q = (f.query || "").toLowerCase().trim();
+  const sellSet = Array.isArray(f.sellBuy)
+    ? f.sellBuy
+    : ["sell","buy","unknown"];
+
+  const citySet = new Set(f.cities || []);
+  const minPrice = f.priceMin !== "" ? Number(f.priceMin) : null;
+  const maxPrice = f.priceMax !== "" ? Number(f.priceMax) : null;
+
+  const out = rows.filter(r => {
+
+    // 🔥 STATUS FILTER (фикс)
+    if (Array.isArray(f.status) && f.status.length > 0) {
+
+        const userId =
+          r.Type === "comment"
+            ? r.CommentUserID
+            : r.UserID;
+
+        const user = DB.User.find(
+          u => String(u.UserID) === String(userId)
+        );
+
+        const userStatus = Number(user?.Contacted ?? 0);
+
+        if (!f.status.includes(userStatus))
+          return false;
+      }
+
+
+    // SELL / BUY
+    if (!matchesSellBuySet(r.SellOrBuy, sellSet))
+      return false;
+
+    // CITY
+    if (citySet.size) {
+      const city = getAllRowCity(r);
+      if (!citySet.has(city)) return false;
+    }
+
+    // CONTACTS
+    if (f.contacts !== "all") {
+      const hasContacts = getAllRowHasContacts(r);
+      if (f.contacts === "yes" && !hasContacts) return false;
+      if (f.contacts === "no" && hasContacts) return false;
+    }
+
+    // PRICE
+    if (minPrice !== null || maxPrice !== null) {
+      const price = getAllRowPrice(r);
+      if (minPrice !== null && price < minPrice) return false;
+      if (maxPrice !== null && price > maxPrice) return false;
+    }
+
+// SEARCH
+    if (q) {
+      const ql = q;
+
+      const match =
+        (r.UserName && r.UserName.toLowerCase().includes(ql)) ||
+        (r.PostText && r.PostText.toLowerCase().includes(ql)) ||
+        (r.Text && r.Text.toLowerCase().includes(ql)) ||
+        (r.notes && r.notes.toLowerCase().includes(ql));
+
+      if (!match) return false;
+    }
+
+    return true;
+  });
+
+  // 🔥 SORTING
+if (f.landSort && f.landSort !== "none") {
+  const dir = f.landSort === "asc" ? 1 : -1;
+  out.sort((a,b) => (getAllRowLand(a) - getAllRowLand(b)) * dir);
+
+} else if (f.priceSort && f.priceSort !== "none") {
+  const dir = f.priceSort === "asc" ? 1 : -1;
+  out.sort((a,b) => (getAllRowPrice(a) - getAllRowPrice(b)) * dir);
+
+} else if (f.citySort && f.citySort !== "none") {
+  const dir = f.citySort === "asc" ? 1 : -1;
+  out.sort((a,b) =>
+    getAllRowCity(a)
+      .localeCompare(getAllRowCity(b), "en", { sensitivity:"base" }) * dir
+  );
+
+} else if (f.dateSort === "oldest") {
+  out.sort((a,b) =>
+    (parseISO(a.DateISO)?.getTime() || 0) -
+    (parseISO(b.DateISO)?.getTime() || 0)
+  );
+
+} else {
+  // newest default
+  out.sort((a,b) =>
+    (parseISO(b.DateISO)?.getTime() || 0) -
+    (parseISO(a.DateISO)?.getTime() || 0)
+  );
+}
+
+
+  return out;
+}
+
+
+function applyUsersFilters() {
+  const f = state.applied.users;
+  if (!Array.isArray(f.status)) {
+    f.status = [0,1,2,3,4];
+  }
+  // 1️⃣ Сначала просто собираем расширенные данные
+  const rows = DB.User.map(u => {
+
+    const last = getUserLastActivityDate(u.UserID);
+    const texts = [];
+
+    for (const p of DB.Post) {
+      if (p.UserID === u.UserID) {
+        texts.push((p.TextPost || "") + " " + (p.Tags || ""));
+      }
+    }
+
+    let hasSell = false;
+    let hasBuy  = false;
+
+    for (const c of DB.Comment) {
+      const ownerId = c.PostOwnerID ?? null;
+      if (ownerId !== u.UserID) continue;
+
+      const sb = inferSellBuyFromText(c.TextComment || "");
+      if (sb === "sell") hasSell = true;
+      if (sb === "buy")  hasBuy  = true;
+    }
+
+    const lang = detectLanguage(texts.join(" "));
+
+    return {
+      ...u,
+      LastActivityDate: last ? new Date(last) : null,
+      Language: lang,
+      _hasSell: hasSell,
+      _hasBuy: hasBuy,
+      Contacts: u.Contacts || ""
+    };
+  });
+
+  // 2️⃣ А теперь фильтруем
+  const out = rows.filter(u => {
+
+    // 🔥 STATUS
+      if (Array.isArray(f.status) && f.status.length) {
+        const userStatus = Number(u.Contacted ?? 0);
+        if (!f.status.includes(userStatus)) return false;
+      }
+
+      // 📇 CONTACTS
+      if (f.contacts !== "all") {
+
+        const has = hasContactsObj(extractContacts(u));
+
+        if (f.contacts === "yes" && !has)
+          return false;
+
+        if (f.contacts === "no" && has)
+          return false;
+      }
+    // search
+    if (f.q) {
+      const q = f.q.toLowerCase();
+      const blob = `${u.UserName} ${u.UserID} ${u.ProfileURL}`.toLowerCase();
+      if (!blob.includes(q)) return false;
+    }
+
+    // intent
+    if (f.sellBuy !== "all") {
+      if (f.sellBuy === "sell" && !u._hasSell) return false;
+      if (f.sellBuy === "buy"  && !u._hasBuy)  return false;
+      if (f.sellBuy === "unknown" && (u._hasSell || u._hasBuy)) return false;
+    }
+
+    if (!numInRange(u.CommsAllCount, f.minComms, f.maxComms)) return false;
+
+    if (f.lang !== "all" && u.Language !== f.lang) return false;
+
+    return true;
+  });
+
+  // сортировки
+  if (f.sort === "newest") {
+    out.sort((a,b) =>
+      (b.LastActivityDate?.getTime() || 0) -
+      (a.LastActivityDate?.getTime() || 0)
+    );
+  } else if (f.sort === "oldest") {
+    out.sort((a,b) =>
+      (a.LastActivityDate?.getTime() || 0) -
+      (b.LastActivityDate?.getTime() || 0)
+    );
+  } else if (f.sort === "activity_desc") {
+    out.sort((a,b) => Number(b.Activity||0) - Number(a.Activity||0));
+  } else if (f.sort === "activity_asc") {
+    out.sort((a,b) => Number(a.Activity||0) - Number(b.Activity||0));
+  } else if (f.sort === "posts_desc") {
+    out.sort((a,b) => Number(b.PostsAllCount||0) - Number(a.PostsAllCount||0));
+  } else if (f.sort === "posts_asc") {
+    out.sort((a,b) => Number(a.PostsAllCount||0) - Number(b.PostsAllCount||0));
+  } else if (f.sort === "comms_desc") {
+    out.sort((a,b) => Number(b.CommsAllCount||0) - Number(a.CommsAllCount||0));
+  } else if (f.sort === "comms_asc") {
+    out.sort((a,b) => Number(a.CommsAllCount||0) - Number(b.CommsAllCount||0));
+  }
+
+  return out;
+}
+
+
+      function applyPostsFilters(rows = DB.Post, filterState = state.applied.posts){
+  const focus = state.userFocus;
+  const f = filterState;
+
+  rows = Array.isArray(rows) ? rows : [];
+
+  const sellSet =
+    Array.isArray(f.sellBuy) && f.sellBuy.length
+      ? f.sellBuy
+      : ["sell","buy","unknown"];
+
+  const citySet = new Set(f.cities || []);
+  const minPrice = f.priceMin !== "" ? Number(f.priceMin) : null;
+  const maxPrice = f.priceMax !== "" ? Number(f.priceMax) : null;
+
+  const out = rows.filter(p => {
+    if(!p) return false;
+
+    if(focus && p.UserID !== focus.UserID) return false;
+
+    if (Array.isArray(f.status) && f.status.length) {
+      const u = userById(p.UserID);
+      const userStatus = Number(u?.Contacted ?? 0);
+      if (!f.status.includes(userStatus)) return false;
+    }
+
+    const q = String(f.q || "").toLowerCase().trim();
+    if (q) {
+      const matchInText =
+        String(p.TextPost || "").toLowerCase().includes(q);
+
+      const matchInTags =
+        String(p.Tags || "").toLowerCase().includes(q);
+
+      const matchInNotes =
+        String(p.notes || "").toLowerCase().includes(q);
+
+      const matchInUser = (() => {
+        const u = userById(p.UserID);
+        return String(u?.UserName || "").toLowerCase().includes(q);
+      })();
+
+      if (!matchInText && !matchInTags && !matchInUser && !matchInNotes)
+        return false;
+    }
+
+    if(f.contacts !== "all"){
+      const has = postHasContacts(p);
+      if(f.contacts === "yes" && !has) return false;
+      if(f.contacts === "no" && has) return false;
+    }
+
+    const intent = (p.SellOrBuy || p.SellBuy || "unknown").toLowerCase();
+    if(!matchesSellBuySet(intent, sellSet)) return false;
+
+    if(citySet.size){
+      const city = p.City || "-";
+      if(!citySet.has(city)) return false;
+    }
+
+    if(minPrice !== null || maxPrice !== null){
+      const price = Number(p.Price || 0);
+      if(minPrice !== null && price < minPrice) return false;
+      if(maxPrice !== null && price > maxPrice) return false;
+    }
+
+    return true;
+  });
+
+  if(f.commentsSort && f.commentsSort !== "none"){
+    const dir = f.commentsSort === "asc" ? 1 : -1;
+    out.sort((a,b) => (Number(a.CommentsCount||0) - Number(b.CommentsCount||0)) * dir);
+
+  } else if(f.landSort && f.landSort !== "none"){
+    const dir = f.landSort === "asc" ? 1 : -1;
+    out.sort((a,b) => (Number(a.LandSize||0) - Number(b.LandSize||0)) * dir);
+
+  } else if(f.priceSort && f.priceSort !== "none"){
+    const dir = f.priceSort === "asc" ? 1 : -1;
+    out.sort((a,b) => (Number(a.Price||0) - Number(b.Price||0)) * dir);
+
+  } else if(f.citySort && f.citySort !== "none"){
+    const dir = f.citySort === "asc" ? 1 : -1;
+    out.sort((a,b) => (String(a.City||"").localeCompare(String(b.City||""), "en", { sensitivity:"base" }) * dir));
+
+  } else if(f.dateSort === "oldest"){
+    out.sort((a,b) => (parseISO(a.PostDate)?.getTime()||0) - (parseISO(b.PostDate)?.getTime()||0));
+
+  } else {
+    out.sort((a,b) => (parseISO(b.PostDate)?.getTime()||0) - (parseISO(a.PostDate)?.getTime()||0));
+  }
+
+  return out;
+}
+
+
+function applyCommentsFilters(){
+  const focus = state.userFocus;
+  const f = state.applied.comments;
+
+  const sellSet = Array.isArray(f.sellBuy)
+    ? f.sellBuy
+    : ["sell","buy","unknown"];
+
+  const citySet = new Set(f.cities || []);
+
+  const out = DB.Comment.filter(c => {
+
+    // 🔥 POST FOCUS
+        if (state.postFocus) {
+          if (String(c.PostID) !== String(state.postFocus))
+            return false;
+        }
+
+    // 🔥 USER FOCUS
+    if (focus) {
+      const authorId = String(c.CommentUserID ?? c.UserID ?? "");
+      const focusId  = String(focus.UserID ?? "");
+      if (!authorId || authorId !== focusId) return false;
+    }
+
+    // ✅ STATUS (через пользователя)
+    if (Array.isArray(f.status) && f.status.length) {
+      const userId = c.CommentUserID ?? c.UserID;
+      const user = DB.User.find(u => String(u.UserID) === String(userId));
+      const userStatus = Number(user?.Contacted ?? 0);
+
+      if (!f.status.includes(userStatus)) return false;
+    }
+
+
+    // 🔍 SEARCH
+    if (f.q) {
+      const q = String(f.q).toLowerCase();
+
+      const matchInComment =
+        String(c.TextComment || "").toLowerCase().includes(q);
+
+      const matchInNotes =
+        String(c.notes || "").toLowerCase().includes(q);
+
+      const post = DB.Post.find(p => String(p.PostID) === String(c.PostID));
+
+      const matchInPost =
+        String(post?.TextPost || "").toLowerCase().includes(q);
+
+      const user = DB.User.find(u => String(u.UserID) === String(c.UserID));
+
+      const matchInUser =
+        String(user?.UserName || "").toLowerCase().includes(q);
+
+      if (!matchInComment && !matchInPost && !matchInUser && !matchInNotes)
+        return false;
+    }
+
+    // 📇 CONTACTS
+    if (f.contacts !== "all") {
+
+      const has = hasContactsObj(extractContacts(c));
+
+      if (f.contacts === "yes" && !has)
+        return false;
+
+      if (f.contacts === "no" && has)
+        return false;
+    }
+
+
+    // 🎯 INTENT (берём из комментария ИЛИ поста)
+    if (sellSet.length) {
+      const intent =
+        String(
+          c.SellOrBuy ||
+          c.SellBuy ||
+          inferSellBuyFromText(c.TextComment) ||
+          "unknown"
+        ).toLowerCase();
+
+      if (!matchesSellBuySet(intent, sellSet)) return false;
+    }
+
+
+    // 🏙 CITY (берём из связанного поста)
+    if (citySet.size) {
+      const post = DB.Post.find(p => String(p.PostID) === String(c.PostID));
+      const city = post?.City || "-";
+      if (!citySet.has(city)) return false;
+    }
+
+    return true;
+  });
+
+  // 📅 SORT
+  if (f.dateSort === "oldest") {
+    out.sort((a,b) =>
+      (parseISO(a.CommentDate)?.getTime()||0) -
+      (parseISO(b.CommentDate)?.getTime()||0)
+    );
+  } else {
+    out.sort((a,b) =>
+      (parseISO(b.CommentDate)?.getTime()||0) -
+      (parseISO(a.CommentDate)?.getTime()||0)
+    );
+  }
+
+  return out;
+}
+
+
+
+function renderEntityUserFromRow(r){
+  const name = (r.UserName || "").trim() || "Anonymous";
+  const url  = (r.ProfileURL || "").trim() || "#";
+  return `<a href="${escapeHtml(url)}" target="_blank">${escapeHtml(name)}</a>`;
+}
+
+
+
+function renderStatusBody(filterKey, selectedStatuses = [], noFilter = false) {
+  const STATUS = [
+    { value: 0, label: "New" },
+    // { value: 1, label: "Not relevant" },
+    { value: 2, label: "Response expected" },
+    { value: 3, label: "Negative response" },
+    { value: 4, label: "Positive response" }
+  ];
+
+  const allValues = STATUS.map(s => s.value);
+
+  const selectedSet = new Set(
+    selectedStatuses.length ? selectedStatuses : allValues
+  );
+
+  const statusChecks = STATUS.map(s => `
+    <label class="filterOption">
+      <input type="checkbox"
+             name="${filterKey}"
+             value="${s.value}"
+             ${!noFilter && selectedSet.has(s.value) ? "checked" : ""}>
+      ${s.label}
+    </label>
+  `).join("");
+
+  return `
+    <div class="filterTools">
+      <button class="btn small ghost" data-filter-action="${filterKey}_all">
+        Select all
+      </button>
+      <button class="btn small ghost" data-filter-action="${filterKey}_none">
+        Clear all
+      </button>
+      <label class="filterOption">
+        <input type="checkbox"
+               name="${filterKey}_none"
+               ${noFilter ? "checked" : ""}>
+        No filter
+      </label>
+    </div>
+
+    <div class="filterList">
+      ${statusChecks}
+    </div>
+  `;
+}
+
+    // ------------------------
+    // Table renderers
+    // ------------------------
+    
+function renderAllTable(rows){
+  const tableWrap = document.getElementById("tableWrap");
+  if(!tableWrap){
+    console.warn("renderAllTable: #tableWrap not found");
+    return;
+  }
+  const offset = getPageOffset(state.view);
+
+  const f = state.applied.all;
+  const sellBuyAll = ["sell","buy","unknown"];
+
+  if(!Array.isArray(f.sellBuy) || f.sellBuy.length === 0){
+    f.sellBuy = [...sellBuyAll];
+  }
+  if(!Array.isArray(f.cities)) f.cities = [];
+
+  const sellSet = new Set(f.sellBuy);
+  const citySet = new Set(f.cities);
+  const cities = getAllCities();
+  const cityOptions = cities.length ? cities : ["-"];
+  const citySort = f.citySort || "none";
+
+  const isDateActive       = f.dateSort !== "newest" && f.dateSort !== "none";
+  const isSellBuyActive   = sellSet.size < sellBuyAll.length;
+  const isCityActive      = citySet.size > 0 || (f.citySort && f.citySort !== "none");
+  const isLandActive      = f.landSort && f.landSort !== "none";
+  const isPriceActive     = f.priceSort && f.priceSort !== "none";
+  const isContactsActive  = f.contacts !== "all";
+  const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
+
+
+  const statusBody = renderStatusBody(
+  "all_status",
+  state.applied.all.status || []
+);
+
+  // ------------------------
+  // Filter popover bodies
+  // ------------------------
+  const sellBuyChecks = sellBuyAll.map(v => {
+    const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
+    return `
+      <label class="filterOption">
+        <input type="checkbox" name="all_sellBuy" value="${v}" ${sellSet.has(v) ? "checked" : ""}>
+        ${label}
+      </label>
+    `;
+  }).join("");
+
+  const cityChecks = cityOptions.map(c => `
+    <label class="filterOption" data-Location-option="${escapeHtml(c)}">
+      <input type="checkbox" name="all_Location" value="${escapeHtml(c)}" ${citySet.has(c) ? "checked" : ""}>
+      ${escapeHtml(c)}
+    </label>
+  `).join("");
+
+  const dateBody = `
+    <label class="filterOption"><input type="radio" name="all_date_sort" value="none" ${f.dateSort==="none"?"checked":""}>No filter</label>
+    <label class="filterOption"><input type="radio" name="all_date_sort" value="newest" ${f.dateSort==="newest"?"checked":""}>Newest</label>
+    <label class="filterOption"><input type="radio" name="all_date_sort" value="oldest" ${f.dateSort==="oldest"?"checked":""}>Oldest</label>
+  `;
+
+  const sellBuyBody = `
+    <div class="filterTools">
+      <button class="btn small ghost" data-filter-action="sellbuy_all">Select all</button>
+      <button class="btn small ghost" data-filter-action="sellbuy_none">Clear all</button>
+      <label class="filterOption"><input type="checkbox" name="all_sellBuy_none">No filter</label>
+    </div>
+    <div class="filterList">${sellBuyChecks}</div>
+  `;
+
+  const cityBody = `
+    <input class="filterInput" id="all_Location_search" placeholder="Type a location..." />
+    <div class="filterTools">
+      <button class="btn small ghost" data-filter-action="Location_all">Select all</button>
+      <button class="btn small ghost" data-filter-action="Location_none">Clear all</button>
+      <label class="filterOption"><input type="checkbox" name="all_Location_none">No filter</label>
+    </div>
+    <div class="filterList" id="all_Location_list_wrap">${cityChecks}</div>
+  `;
+
+  const landBody = `
+    <label class="filterOption"><input type="radio" name="all_land_sort" value="none" ${f.landSort==="none"?"checked":""}>No filter</label>
+    <label class="filterOption"><input type="radio" name="all_land_sort" value="asc" ${f.landSort==="asc"?"checked":""}>Low to high</label>
+    <label class="filterOption"><input type="radio" name="all_land_sort" value="desc" ${f.landSort==="desc"?"checked":""}>High to low</label>
+  `;
+
+  const priceBody = `
+    <div class="filterTools">
+      <input class="filterInput" id="all_price_min" placeholder="From" value="${escapeHtml(f.priceMin || "")}" />
+      <input class="filterInput" id="all_price_max" placeholder="To" value="${escapeHtml(f.priceMax || "")}" />
+    </div>
+    <label class="filterOption"><input type="radio" name="all_price_sort" value="none" ${f.priceSort==="none"?"checked":""}>No filter</label>
+    <label class="filterOption"><input type="radio" name="all_price_sort" value="asc" ${f.priceSort==="asc"?"checked":""}>Low to high</label>
+    <label class="filterOption"><input type="radio" name="all_price_sort" value="desc" ${f.priceSort==="desc"?"checked":""}>High to low</label>
+  `;
+
+  const contactsBody = `
+    <label class="filterOption"><input type="radio" name="all_contacts" value="all" ${f.contacts==="all"?"checked":""}>No filter</label>
+    <label class="filterOption"><input type="radio" name="all_contacts" value="yes" ${f.contacts==="yes"?"checked":""}>With contacts</label>
+    <label class="filterOption"><input type="radio" name="all_contacts" value="no" ${f.contacts==="no"?"checked":""}>Without contacts</label>
+  `;
+
+
+  // ------------------------
+  // TABLE HTML
+  // ------------------------
+  tableWrap.innerHTML = `
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="rowNo center">#</th>
+          <th class="center">Type</th>
+
+          <th>Post</th>
+          <th>Comments</th>
+
+          <th>User</th>
+
+          <th class="center thFilter">
+            <div class="thFilterWrap">
+              <span>Date</span>
+              ${renderFilterBtn("date", isDateActive)}
+            </div>
+            ${renderFilterPopover("date", "Date", dateBody)}
+          </th>
+
+          <th class="center thFilter">
+            <div class="thFilterWrap">
+              <span>Intent</span>
+              ${renderFilterBtn("sellbuy", isSellBuyActive)}
+            </div>
+            ${renderFilterPopover("sellbuy", "Intent", sellBuyBody)}
+          </th>
+
+          <th class="center thFilter">
+            <div class="thFilterWrap">
+              <span>Location</span>
+              ${renderFilterBtn("Location", isCityActive)}
+            </div>
+            ${renderFilterPopover("Location", "Location", cityBody)}
+          </th>
+
+          <th class="thFilter">
+            <div class="thFilterWrap">
+              <span>Contacts</span>
+              ${renderFilterBtn("contacts", isContactsActive)}
+            </div>
+            ${renderFilterPopover("contacts", "Contacts", contactsBody)}
+          </th>
+
+          <th class="stickyRight center thFilter">
+            <div class="thFilterWrap">
+              <span>Status</span>
+              ${renderFilterBtn("status", isStatusActive)}
+
+            </div>
+            ${renderFilterPopover("status", "Status", statusBody)}
+          </th>
+          <th class="summaryColNotes">Notes</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${rows.map((r, idx) => {
+
+
+          const actorId = (r.Type === "comment")
+            ? (r.CommentUserID || "-")
+            : (r.UserID || "-");
+
+          const actorName = (r.Type === "comment")
+            ? (r.CommentUserName || "Anonymous")
+            : (r.UserName || "Anonymous");
+
+          const actorProfile = (r.Type === "comment")
+            ? (r.CommentProfileURL || "#")
+            : (r.ProfileURL || "#");
+            
+
+          const postMap = {};
+            DB.Post.forEach(p => {
+              postMap[String(p.PostID)] = p;
+            });
+
+        console.log(r.Type, r.UserName, r.UserID);
+
+          const isComment = r.Type === "comment";
+
+  // ---------- intent ----------
+  const rawIntentText = (r.Text || r.PostText || "").trim();
+  const intent = friendlySellBuy(
+    r.SellOrBuy || inferSellBuyFromText(rawIntentText)
+  );
+
+  // ---------- safe fields ----------
+  const city  = r.City || "-";
+  const land  = r.LandSize || "-";
+  const price = r.Price || 0;
+if (r.Type === "post") {
+  console.log("POSTID:", r.PostID);
+}
+
+
+  const  payloadTextPost =  {
+    kind: "post",
+    userId: actorId,
+    postUrl: r.PostURL,
+    group: r.GroupName,
+    groupUrl: r.GroupURL,
+    date: r.DateISO,
+    text: r.PostText || "-",
+    textPost: r.PostText || "",
+    postId: r.PostID,
+    commentId: r.CommentID,          
+    notes: r.notes || "",
+    commentsCount: postMap[String(r.PostID)]?.CommentsCount || 0
+  }
+
+  const payloadTextComment = {
+      kind: "comment",
+      userId: actorId,
+      postUrl: r.PostURL,
+      group: r.GroupName,
+      groupUrl: r.GroupURL,
+      date: r.DateISO,
+      text: r.Text || "-",
+      commentId: r.CommentID,          
+      notes: r.notes || "",
+      textPost: r.PostText || ""
+  }
+
+  const notesPayload =
+  r.Type === "comment"
+    ? payloadTextComment
+    : payloadTextPost;
+
+
+  return `
+    <tr 
+      data-type="${r.Type}" 
+      data-post-id="${r.PostID || ""}"
+    >
+      <td class="center">
+        ${getPageOffset(state.view) + idx + 1}
+      </td>
+
+      <td class="center">
+        ${typeIcon(r.Type)}
+      </td>
+
+      
+      <!-- POST -->
+      <td class="summaryCol">
+        ${renderClamped(r.PostText || "-", {
+          kind: "post",
+          userId: actorId,
+          postUrl: r.PostURL,
+          group: r.GroupName,
+          groupUrl: r.GroupURL,
+          date: r.DateISO,
+          text: r.PostText || "-",
+          textPost: r.PostText || "",
+          postId: r.PostID,
+          commentId: r.CommentID,          
+          notes: r.notes || "",
+          commentsCount: postMap[String(r.PostID)]?.CommentsCount || 0
+        })}
+      </td>
+
+      <!-- COMMENTS -->
+      <td class="summaryCol">
+        ${isComment
+          ? renderClamped(r.Text || "-", {
+              kind: "comment",
+              userId: actorId,
+              postUrl: r.PostURL,
+              group: r.GroupName,
+              groupUrl: r.GroupURL,
+              date: r.DateISO,
+              text: r.Text || "-",
+              commentId: r.CommentID,          
+              notes: r.notes || "",
+              textPost: r.PostText || ""
+            })
+          : "-"
+        }
+      </td>
+
+
+      <!-- USER -->
+      <td data-type="${r.Type}" data-post-id="${r.PostID}">
+        <a target="_blank">
+          ${renderEntityUser(r)}
+        </a>
+  
+      </td>
+
+      <!-- DATE -->
+      <td class="center cellMono nowrap">
+        ${r.DateISO ? formatDateShort(r.DateISO) : "-"}
+      </td>
+
+      <!-- INTENT -->
+      <td class="center nowrap">
+        ${escapeHtml(intent)}
+      </td>
+
+      <!-- CITY -->
+      <td class="center nowrap">
+        ${escapeHtml(city)}
+      </td>
+
+      <!-- CONTACTS -->
+      <td>
+        ${renderContactsCell(r)}
+      </td>
+
+      <!-- STATUS -->
+      <td class="stickyRight center">
+        ${renderContactedButton(actorId)}
+      </td>
+      <!-- NOTES -->
+      <td class="summaryColNotes">
+        ${renderClamped(r.notes || "-", notesPayload)}
+      </td>
+    </tr>
+  `;
+}).join("")}
+
+      </tbody>
+    </table>
+  `;
+
+  // --------------------
+// RIGHT CLICK MENU
+// --------------------
+document.addEventListener("contextmenu", function(e){
+
+  const row = e.target.closest("#tableWrap tbody tr");
+  if(!row) return;
+
+  const type = row.dataset.type;
+
+  // разрешаем только посты
+  if(type !== "post") return;
+
+  e.preventDefault();
+
+  contextPostId = row.dataset.postId;
+
+  const menu = document.getElementById("contextMenu");
+  const trashBtn = document.getElementById("trashAction");
+  const restoreBtn = document.getElementById("restoreAction");
+
+  if(state.view === "trash"){
+    trashBtn.style.display = "none";
+    restoreBtn.style.display = "block";
+  } else {
+    trashBtn.style.display = "block";
+    restoreBtn.style.display = "none";
+  }
+
+  menu.style.display = "block";
+  menu.style.left = e.pageX + "px";
+  menu.style.top = e.pageY + "px";
+});
+}
+document.addEventListener("click", () => {
+  document.getElementById("contextMenu").style.display = "none";
+});
+
+let contextPostId = null;
+
+document.addEventListener("contextmenu", function(e){
+
+  const row = e.target.closest("#tableWrap tbody tr");
+  if(!row) return;
+
+  const type = row.dataset.type;
+
+  // разрешаем только посты
+  if(type !== "post") return;
+
+  e.preventDefault();
+
+  contextPostId = row.dataset.postId;
+
+  const menu = document.getElementById("contextMenu");
+  const trashBtn = document.getElementById("trashAction");
+  const restoreBtn = document.getElementById("restoreAction");
+
+  if(state.view === "trash"){
+    trashBtn.style.display = "none";
+    restoreBtn.style.display = "block";
+  } else {
+    trashBtn.style.display = "block";
+    restoreBtn.style.display = "none";
+  }
+
+  menu.style.display = "block";
+  menu.style.left = e.pageX + "px";
+  menu.style.top = e.pageY + "px";
+});
+
+
+document.addEventListener("click", async (e) => {
+
+  if (!e.target.closest("#trashAction")) return;
+
+  await apiFetch(`/api/posts/${contextPostId}/trash`, {
+    method: "PATCH"
+  });
+
+  const post = DB.Post.find(p => String(p.PostID) === String(contextPostId));
+  if (post) post.trash = 1;
+
+  document.getElementById("contextMenu").style.display = "none";
+
+  render();
+});
+
+document.addEventListener("contextmenu", function(e){
+
+  const row = e.target.closest("#tableWrap tbody tr");
+  if(!row) return;
+
+  const type = row.dataset.type;
+
+  // разрешаем только посты
+  if(type !== "post") return;
+
+  e.preventDefault();
+
+  contextPostId = row.dataset.postId;
+
+  const menu = document.getElementById("contextMenu");
+  const trashBtn = document.getElementById("trashAction");
+  const restoreBtn = document.getElementById("restoreAction");
+
+  if(state.view === "trash"){
+    trashBtn.style.display = "none";
+    restoreBtn.style.display = "block";
+  } else {
+    trashBtn.style.display = "block";
+    restoreBtn.style.display = "none";
+  }
+
+  menu.style.display = "block";
+  menu.style.left = e.pageX + "px";
+  menu.style.top = e.pageY + "px";
+});
+
+
+document.addEventListener("click", async (e) => {
+
+  if (!e.target.closest("#restoreAction")) return;
+
+  await apiFetch(`/api/posts/${contextPostId}/restore`, {
+    method: "PATCH"
+  });
+
+  const post = DB.Post.find(p => String(p.PostID) === String(contextPostId));
+  if(post) post.trash = 0;
+
+  render();
+});
+
+
+
+
+
+    function renderUsersTable(rows){
+      const f = state.applied.users;
+      const isActivityActive = ["activity_asc","activity_desc"].includes(f.sort);
+      const isPostsActive = ["posts_asc","posts_desc"].includes(f.sort);
+      const isCommentsActive = ["comms_asc","comms_desc"].includes(f.sort);
+      const isContactsActive = f.contacts !== "all";
+      const isContactedActive = f.contacted !== "all";
+      const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
+
+      const statusBody = renderStatusBody(
+        "users_status",
+        state.applied.users.status ?? []
+      );
+
+      const activityBody = `
+        <label class="filterOption"><input type="radio" name="users_activity_sort" value="none" ${isActivityActive?"":"checked"}>No filter</label>
+        <label class="filterOption"><input type="radio" name="users_activity_sort" value="asc" ${f.sort==="activity_asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="users_activity_sort" value="desc" ${f.sort==="activity_desc"?"checked":""}>High to low</label>
+      `;
+      const postsBody = `
+        <label class="filterOption"><input type="radio" name="users_posts_sort" value="none" ${isPostsActive?"":"checked"}>No filter</label>
+        <label class="filterOption"><input type="radio" name="users_posts_sort" value="asc" ${f.sort==="posts_asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="users_posts_sort" value="desc" ${f.sort==="posts_desc"?"checked":""}>High to low</label>
+      `;
+      const commentsBody = `
+        <label class="filterOption"><input type="radio" name="users_comments_sort" value="none" ${isCommentsActive?"":"checked"}>No filter</label>
+        <label class="filterOption"><input type="radio" name="users_comments_sort" value="asc" ${f.sort==="comms_asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="users_comments_sort" value="desc" ${f.sort==="comms_desc"?"checked":""}>High to low</label>
+      `;
+      const contactsBody = `
+        <label class="filterOption"><input type="radio" name="users_contacts" value="all" ${f.contacts==="all"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="users_contacts" value="yes" ${f.contacts==="yes"?"checked":""}>With contacts</label>
+        <label class="filterOption"><input type="radio" name="users_contacts" value="no" ${f.contacts==="no"?"checked":""}>Without contacts</label>
+      `;
+
+
+
+      const html = `
+        <table>
+        <thead>
+            <tr>
+              <th class="rowNo center">#</th>
+              <th>User ${help("User name (click opens profile).")}</th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Activity</span>
+                  ${renderFilterBtn("users_activity", isActivityActive)}
+                </div>
+                ${renderFilterPopover("users_activity", "Activity", activityBody)}
+              </th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Total posts</span>
+                  ${renderFilterBtn("users_posts", isPostsActive)}
+                </div>
+                ${renderFilterPopover("users_posts", "Total posts", postsBody)}
+              </th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Total comments</span>
+                  ${renderFilterBtn("users_comments", isCommentsActive)}
+                </div>
+                ${renderFilterPopover("users_comments", "Total comments", commentsBody)}
+              </th>
+              <th class="thFilter">
+                <div class="thFilterWrap">
+                  <span>Contacts</span>
+                  ${renderFilterBtn("users_contacts", isContactsActive)}
+                </div>
+                ${renderFilterPopover("users_contacts", "Contacts", contactsBody)}
+              </th>
+              <th class="stickyRight center thFilter">
+                <div class="thFilterWrap">
+                  <span>Status</span>
+                  ${renderFilterBtn("users_status", isStatusActive)}
+                </div>
+                ${renderFilterPopover("users_status", "Status", statusBody)}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((u, idx) => {
+                            console.log("USER ROW", u);
+              const contactsHtml = contactsToHtml(u.Contacts);
+              return `
+                <tr>
+                  <td class="center cellMono nowrap">${getPageOffset(state.view) + idx + 1}</td>
+                  <td>${renderEntityUser(u)}</td>
+                  <td class="center cellMono nowrap">${escapeHtml(u.Activity)}</td>
+
+                  <td class="center cellMono nowrap">
+                    <a href="#" data-action="jumpToPosts" data-user="${escapeHtml(u.UserID)}" class="cellMono">${escapeHtml(u.PostsAllCount)}</a>
+                  </td>
+
+                  <td class="center cellMono nowrap">
+                    <a href="#" data-action="jumpToComments" data-user="${escapeHtml(u.UserID)}" class="cellMono">${escapeHtml(u.CommsAllCount)}</a>
+                  </td>
+
+                  <td>${renderContactsCell(u)}</td>
+                  <td class="stickyRight center">${renderContactedButton(u.UserID)}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+      $("tableWrap").innerHTML = html;
+      const wrap = document.getElementById("tableWrap");
+      if (wrap) wrap.scrollTop = 0;
+    }
+function renderPostsTable(rows){
+
+      const view = state.view || "posts";
+      const f = state.applied[state.view] || state.applied.posts;
+      const sellBuyAll = ["sell","buy","unknown"];
+      if(!Array.isArray(f.sellBuy) || f.sellBuy.length === 0) f.sellBuy = [...sellBuyAll];
+      if(!Array.isArray(f.cities)) f.cities = [];
+      const sellSet = new Set(f.sellBuy);
+      const citySet = new Set(f.cities);
+      const cities = getPostCities();
+      const cityOptions = cities.length ? cities : ["-"];
+      const isDateActive = f.dateSort !== "newest" && f.dateSort !== "none";
+      const isSellBuyActive = sellSet.size < sellBuyAll.length;
+      const isCityActive = citySet.size > 0 || (f.citySort && f.citySort !== "none");
+      const isLandActive = f.landSort && f.landSort !== "none";
+      const isPriceActive = f.priceSort && f.priceSort !== "none";
+      const isCommentsActive = f.commentsSort && f.commentsSort !== "none";
+      const isContactsActive = f.contacts !== "all";
+      const isContactedActive = f.contacted !== "all";
+      const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
+
+      const statusBody = renderStatusBody(
+        "posts_status",
+        state.applied.posts.status ?? null
+      );
+
+
+      const sellBuyChecks = sellBuyAll.map(v => {
+        const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
+        return `<label class="filterOption"><input type="checkbox" name="posts_sellBuy" value="${v}" ${sellSet.has(v) ? "checked" : ""}>${label}</label>`;
+      }).join("");
+      const cityChecks = cityOptions.map(c => {
+        const checked = citySet.has(c) ? "checked" : "";
+        return `<label class="filterOption" data-Location-option="${escapeHtml(c)}"><input type="checkbox" name="posts_Location" value="${escapeHtml(c)}" ${checked}>${escapeHtml(c)}</label>`;
+      }).join("");
+      const dateBody = `
+        <label class="filterOption"><input type="radio" name="posts_date_sort" value="none" ${f.dateSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="posts_date_sort" value="newest" ${f.dateSort==="newest"?"checked":""}>Newest</label>
+        <label class="filterOption"><input type="radio" name="posts_date_sort" value="oldest" ${f.dateSort==="oldest"?"checked":""}>Oldest</label>
+      `;
+      const sellBuyBody = `
+        <div class="filterTools">
+          <button class="btn small ghost" data-filter-action="posts_sellbuy_all">Select all</button>
+          <button class="btn small ghost" data-filter-action="posts_sellbuy_none">Clear all</button>
+          <label class="filterOption"><input type="checkbox" name="posts_sellBuy_none">No filter</label>
+        </div>
+        <div class="filterList">${sellBuyChecks}</div>
+      `;
+      const cityBody = `
+        <input class="filterInput" id="posts_Location_search" placeholder="Type a location..." />
+        <div class="filterTools">
+          <button class="btn small ghost" data-filter-action="posts_Location_all">Select all</button>
+          <button class="btn small ghost" data-filter-action="posts_Location_none">Clear all</button>
+          <label class="filterOption"><input type="checkbox" name="posts_Location_none">No filter</label>
+        </div>
+        <div class="filterList" id="posts_Location_list_wrap">${cityChecks}</div>
+      `;
+      const landBody = `
+        <label class="filterOption"><input type="radio" name="posts_land_sort" value="none" ${f.landSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="posts_land_sort" value="asc" ${f.landSort==="asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="posts_land_sort" value="desc" ${f.landSort==="desc"?"checked":""}>High to low</label>
+      `;
+      const priceBody = `
+        <div class="filterTools">
+          <input class="filterInput" id="posts_price_min" placeholder="From" value="${escapeHtml(f.priceMin || "")}" />
+          <input class="filterInput" id="posts_price_max" placeholder="To" value="${escapeHtml(f.priceMax || "")}" />
+        </div>
+        <label class="filterOption"><input type="radio" name="posts_price_sort" value="none" ${f.priceSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="posts_price_sort" value="asc" ${f.priceSort==="asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="posts_price_sort" value="desc" ${f.priceSort==="desc"?"checked":""}>High to low</label>
+      `;
+      const commentsBody = `
+        <label class="filterOption"><input type="radio" name="posts_comments_sort" value="none" ${f.commentsSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="posts_comments_sort" value="asc" ${f.commentsSort==="asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="posts_comments_sort" value="desc" ${f.commentsSort==="desc"?"checked":""}>High to low</label>
+      `;
+      const contactsBody = `
+        <label class="filterOption"><input type="radio" name="posts_contacts" value="all" ${f.contacts==="all"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="posts_contacts" value="yes" ${f.contacts==="yes"?"checked":""}>With contacts</label>
+        <label class="filterOption"><input type="radio" name="posts_contacts" value="no" ${f.contacts==="no"?"checked":""}>Without contacts</label>
+      `;
+      
+      const html = `
+        <table>
+          <thead>
+            <tr>
+              <th class="rowNo center">#</th>
+              <th class="summaryCol">Post ${help("AI summary (2 lines).")}</th>
+              <th>User ${help("User name opens profile; Details opens user card.")}</th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Comments</span>
+                  ${renderFilterBtn("posts_comments", isCommentsActive)}
+                </div>
+                ${renderFilterPopover("posts_comments", "Comments", commentsBody)}
+              </th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Date</span>
+                  ${renderFilterBtn("posts_date", isDateActive)}
+                </div>
+                ${renderFilterPopover("posts_date", "Date", dateBody)}
+              </th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Intent</span>
+                  ${renderFilterBtn("posts_sellbuy", isSellBuyActive)}
+                </div>
+                ${renderFilterPopover("posts_sellbuy", "Intent", sellBuyBody)}
+              </th>
+
+              <th class="thFilter">
+                <div class="thFilterWrap">
+                  <span>Location</span>
+                  ${renderFilterBtn("posts_Location", isCityActive)}
+                </div>
+                ${renderFilterPopover("posts_Location", "Location", cityBody)}
+              </th>
+              <th class="thFilter">
+                <div class="thFilterWrap">
+                  <span>Contacts</span>
+                  ${renderFilterBtn("posts_contacts", isContactsActive)}
+                </div>
+                ${renderFilterPopover("posts_contacts", "Contacts", contactsBody)}
+              </th>
+
+              <th class="stickyRight center thFilter">
+                <div class="thFilterWrap">
+                  <span>Status</span>
+                  ${renderFilterBtn("posts_status", isStatusActive)}
+                </div>
+                  ${renderFilterPopover("posts_status", "Status", statusBody)}
+              </th>
+              <th class="summaryColNotes" >Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((p, idx) => {
+
+              
+              const group = GroupById(p.GroupID)
+              const intent = (p.SellBuy || inferSellBuyFromText(p.TextPost) || "unknown").toLowerCase();
+              const GroupName = group?.GroupName || "-";
+              const GroupUrl  = group?.GroupURL  || "#";
+              const payloadText = {
+                kind:"post",
+                userId:p.UserID,
+                postUrl:p.Posturl,
+                group:GroupName,
+                groupUrl:GroupUrl,
+                date:p.PostDate,
+                title:"Post details",
+                text:p.TextPost,
+                summary:p.Summary,
+                contacts: p.Contacts,
+                postId: p.PostID,
+                commentsCount: p.CommentsCount || 0,
+                notes: p.notes || "",
+              };
+              const payloadSummary = {
+                kind:"post",
+                userId:p.UserID,
+                postUrl:p.Posturl,
+                group:GroupName,
+                groupUrl:GroupUrl,
+                date:p.PostDate,
+                title:"Post summary",
+                text:p.TextPost,
+                summary:p.Summary,
+                contacts: p.Contacts,
+
+              };
+
+              console.log("POSTS ROW", p);
+              const contactsHtml = contactsToHtml(extractContacts(p));
+              return `
+                <tr data-type="post" data-post-id="${p.PostID}">
+                    <td class="center cellMono nowrap">${getPageOffset("posts") + idx + 1}</td>
+                    <td class="summaryCol">${renderClamped(p.TextPost || "-", payloadText)}</td>
+                    <td>${renderEntityUser(p)}</td>
+                    <td class="center cellMono nowrap linkCell"
+                        onclick="openPostComments('${p.PostID}')">
+                      ${escapeHtml(p.CommentsCount)}
+                    </td>
+                    <td class="center cellMono nowrap">${escapeHtml(formatDateShort(p.PostDate))}</td>
+                    <td class="center nowrap">
+                      ${escapeHtml(
+                        friendlySellBuy(
+                          p.Intent ?? p.SellOrBuy ?? p.SellBuy ?? "unknown"
+                        )
+                      )}
+                    </td>
+
+                    <td class="nowrap">${escapeHtml(p.City || "-")}</td>
+                    <td>${renderContactsCell(p)}</td>
+
+                    <td class="stickyRight center">${renderContactedButton(p.UserID)}</td>
+                    <td class="summaryColNotes">${renderClamped(p.notes || "-", payloadText)}</td>
+
+</tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+      $("tableWrap").innerHTML = html;
+      const wrap = document.getElementById("tableWrap");
+      if (wrap) wrap.scrollTop = 0;
+
+
+       // --------------------
+// RIGHT CLICK MENU
+// --------------------
+document.addEventListener("contextmenu", function(e){
+
+  const row = e.target.closest("#tableWrap tbody tr");
+  if(!row) return;
+
+  const type = row.dataset.type;
+
+  // разрешаем только посты
+  if(type !== "post") return;
+
+  e.preventDefault();
+
+  contextPostId = row.dataset.postId;
+
+  const menu = document.getElementById("contextMenu");
+  const trashBtn = document.getElementById("trashAction");
+  const restoreBtn = document.getElementById("restoreAction");
+
+  if(state.view === "trash"){
+    trashBtn.style.display = "none";
+    restoreBtn.style.display = "block";
+  } else {
+    trashBtn.style.display = "block";
+    restoreBtn.style.display = "none";
+  }
+
+  menu.style.display = "block";
+  menu.style.left = e.pageX + "px";
+  menu.style.top = e.pageY + "px";
+});
+    }
+function renderCommentsTable(rows){
+      const f = state.applied.comments;
+      const sellBuyAll = ["sell","buy","unknown"];
+      if(!Array.isArray(f.sellBuy) || f.sellBuy.length === 0) f.sellBuy = [...sellBuyAll];
+      if(!Array.isArray(f.cities)) f.cities = [];
+      const sellSet = new Set(f.sellBuy);
+      const citySet = new Set(f.cities);
+      const cities = getCommentCities();
+      const cityOptions = cities.length ? cities : ["-"];
+      const isDateActive = f.dateSort !== "newest" && f.dateSort !== "none";
+      const isSellBuyActive = sellSet.size < sellBuyAll.length;
+      const isCityActive = citySet.size > 0 || (f.citySort && f.citySort !== "none");
+      const isLandActive = f.landSort && f.landSort !== "none";
+      const isPriceActive = f.priceSort && f.priceSort !== "none";
+      const isContactsActive = f.contacts !== "all";
+      const isContactedActive = f.contacted !== "all";
+      const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
+      const statusBody = renderStatusBody(
+        "comments_status",
+        state.applied.comments.status ?? null
+      );
+
+
+
+
+      const sellBuyChecks = sellBuyAll.map(v => {
+        const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
+        return `<label class="filterOption"><input type="checkbox" name="comments_sellBuy" value="${v}" ${sellSet.has(v) ? "checked" : ""}>${label}</label>`;
+      }).join("");
+      const cityChecks = cityOptions.map(c => {
+        const checked = citySet.has(c) ? "checked" : "";
+        return `<label class="filterOption" data-Location-option="${escapeHtml(c)}"><input type="checkbox" name="comments_Location" value="${escapeHtml(c)}" ${checked}>${escapeHtml(c)}</label>`;
+      }).join("");
+      const dateBody = `
+        <label class="filterOption"><input type="radio" name="comments_date_sort" value="none" ${f.dateSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="comments_date_sort" value="newest" ${f.dateSort==="newest"?"checked":""}>Newest</label>
+        <label class="filterOption"><input type="radio" name="comments_date_sort" value="oldest" ${f.dateSort==="oldest"?"checked":""}>Oldest</label>
+      `;
+      const sellBuyBody = `
+        <div class="filterTools">
+          <button class="btn small ghost" data-filter-action="comments_sellbuy_all">Select all</button>
+          <button class="btn small ghost" data-filter-action="comments_sellbuy_none">Clear all</button>
+          <label class="filterOption"><input type="checkbox" name="comments_sellBuy_none">No filter</label>
+        </div>
+        <div class="filterList">${sellBuyChecks}</div>
+      `;
+      const cityBody = `
+        <input class="filterInput" id="comments_Location_search" placeholder="Type a location..." />
+        <div class="filterTools">
+          <button class="btn small ghost" data-filter-action="comments_Location_all">Select all</button>
+          <button class="btn small ghost" data-filter-action="comments_Location_none">Clear all</button>
+          <label class="filterOption"><input type="checkbox" name="comments_Location_none">No filter</label>
+        </div>
+        <div class="filterList" id="comments_Location_list_wrap">${cityChecks}</div>
+      `;
+      const landBody = `
+        <label class="filterOption"><input type="radio" name="comments_land_sort" value="none" ${f.landSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="comments_land_sort" value="asc" ${f.landSort==="asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="comments_land_sort" value="desc" ${f.landSort==="desc"?"checked":""}>High to low</label>
+      `;
+      const priceBody = `
+        <div class="filterTools">
+          <input class="filterInput" id="comments_price_min" placeholder="From" value="${escapeHtml(f.priceMin || "")}" />
+          <input class="filterInput" id="comments_price_max" placeholder="To" value="${escapeHtml(f.priceMax || "")}" />
+        </div>
+        <label class="filterOption"><input type="radio" name="comments_price_sort" value="none" ${f.priceSort==="none"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="comments_price_sort" value="asc" ${f.priceSort==="asc"?"checked":""}>Low to high</label>
+        <label class="filterOption"><input type="radio" name="comments_price_sort" value="desc" ${f.priceSort==="desc"?"checked":""}>High to low</label>
+      `;
+      const contactsBody = `
+        <label class="filterOption"><input type="radio" name="comments_contacts" value="all" ${f.contacts==="all"?"checked":""}>No filter</label>
+        <label class="filterOption"><input type="radio" name="comments_contacts" value="yes" ${f.contacts==="yes"?"checked":""}>With contacts</label>
+        <label class="filterOption"><input type="radio" name="comments_contacts" value="no" ${f.contacts==="no"?"checked":""}>Without contacts</label>
+      `;
+
+
+      const html = `
+        <table>
+          <thead>
+            <tr>
+              <th class="rowNo center">#</th>
+              <th class="summaryCol">Comment ${help("AI summary (2 lines).")}</th>
+
+              <th>User ${help("User name opens profile; Details opens user card.")}</th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Date</span>
+                  ${renderFilterBtn("comments_date", isDateActive)}
+                </div>
+                ${renderFilterPopover("comments_date", "Date", dateBody)}
+              </th>
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Intent</span>
+                  ${renderFilterBtn("comments_sellbuy", isSellBuyActive)}
+                </div>
+                ${renderFilterPopover("comments_sellbuy", "Intent", sellBuyBody)}
+              </th>
+
+              <th class="thFilter">
+                <div class="thFilterWrap">
+                  <span>Location</span>
+                  ${renderFilterBtn("comments_Location", isCityActive)}
+                </div>
+                ${renderFilterPopover("comments_Location", "Location", cityBody)}
+              </th>
+              <th class="thFilter">
+                <div class="thFilterWrap">
+                  <span>Contacts</span>
+                  ${renderFilterBtn("comments_contacts", isContactsActive)}
+                </div>
+                ${renderFilterPopover("comments_contacts", "Contacts", contactsBody)}
+              </th>
+
+              <th class="stickyRight center thFilter">
+                <div class="thFilterWrap">
+                  <span>Status</span>
+                  ${renderFilterBtn("comments_status", isStatusActive)}
+                </div>
+                ${renderFilterPopover("comments_status", "Status", statusBody)}
+              </th>
+              <th class="summaryColNotes">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((c, idx) => {
+            const p = c.PostID ? postById(c.PostID) : null;
+
+            const groupUrlFromPost = extractGroupUrlFromPostUrl(
+              p?.PostURL || c.PostURL
+            );
+
+            const group = p?.GroupID
+              ? DB.Group.find(g => g.GroupID === p.GroupID)
+              : null;
+
+              const groupName = group?.GroupName || "-";
+              const groupUrl  = group?.GroupURL  || "#";
+
+              const postText = c.TextPost || (p?.TextPost || "");
+              const payloadText = {
+                kind:"comment",
+                commentId: c.CommentID,         
+                userId:c.UserID,
+                postUrl:p?.Posturl,
+                PostID: c.PostID,
+                groupID: c.GroupID,
+                group: groupName,
+                groupUrl: groupUrl,
+                date:c.CommentDate,
+                title:"Comment details",
+                text:c.TextComment,
+                commentText:c.TextComment,
+                postText:postText,
+                summary:c.SummaryComment,
+                notes: c.notes || ""
+
+              };
+              const payloadPost = {
+                kind:"comment",
+                userId:c.UserID,
+                commentId: c.CommentID,  
+                PostID: c.PostID,
+                postUrl:p?.Posturl,
+                groupID: c.GroupID,
+                group: groupName,
+                groupUrl: groupUrl,
+                date:c.CommentDate,
+                title:"Related post",
+                text:postText || "-",
+                commentText:c.TextComment,
+                postText:postText,
+                summary:c.SummaryComment,
+                notes: c.notes || ""
+              };
+              const payloadSummary = {
+                kind:"comment",
+                userId:c.UserID,
+                PostID: c.PostID,
+                commentId: c.CommentID,  
+                postUrl:p?.Posturl,
+                groupID: c.GroupID,
+                group: groupName,
+                groupUrl: groupUrl,
+                date:c.CommentDate,
+                title:"Comment details",
+                text:c.TextComment,
+                commentText:c.TextComment,
+                postText:postText,
+                summary:c.SummaryComment,
+                notes: c.notes || ""
+              };
+
+              console.log(c)
+              const contactsHtml = contactsToHtml(extractContacts(c));
+              return `
+                <tr data-type="comment">
+                    <td class="center cellMono nowrap">${getPageOffset(state.view) + idx + 1}</td>
+                    <td class="summaryCol">${renderClamped(c.TextComment || "-", payloadSummary)}</td>
+                    <td>${renderEntityUser(c)}</td>
+                    <td class="center cellMono nowrap">${escapeHtml(formatDateShort(c.CommentDate))}</td>
+                    <td class="center nowrap">
+                      ${escapeHtml(friendlySellBuy(c.Intent ?? c.SellOrBuy ?? c.SellBuy ?? "unknown"))}
+                    </td>
+                    <td class="nowrap">${escapeHtml(c.City || "-")}</td>
+                    <td>${renderContactsCell(c)}</td>
+
+                    <td class="stickyRight center">${renderContactedButton(c.UserID)}</td>
+                    <td class="summaryColNotes">${renderClamped(c.notes || "-", payloadSummary)}</td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+      $("tableWrap").innerHTML = html;
+      const wrap = document.getElementById("tableWrap");
+      if (wrap) wrap.scrollTop = 0;
+    }
+
+    // Modal system (single modal for: contacted confirm, text details, user details)
+    // ------------------------
+    function openModal({title, metaLineHtml="", blocks=[], buttons=[], modalClass=""}){
+      const modalEl = document.querySelector(".modal");
+      if(modalEl){
+        modalEl.classList.remove("narrow");
+        if(modalClass) modalEl.classList.add(modalClass);
+      }
+      $("modalTitle").textContent = title;
+      const metaLine = metaLineHtml ? `<div class="metaLine">${metaLineHtml}</div>` : "";
+        const blocksHtml = blocks.map(b => `
+          <div class="block">
+            <div class="blockTitle">${escapeHtml(b.title)}</div>
+            ${
+              b.html
+                ? `<div class="blockContent">${b.html}</div>`
+                : `<div class="blockText">${escapeHtml(b.text || "")}</div>`
+            }
+          </div>
+        `).join("");
+      $("modalBody").innerHTML = metaLine + blocksHtml;
+
+      const footer = $("modalFooter");
+      footer.innerHTML = "";
+      buttons.forEach(btn => {
+        const el = document.createElement("button");
+        el.className = btn.className || "btn";
+        el.textContent = btn.label;
+        el.addEventListener("click", btn.onClick);
+        footer.appendChild(el);
+      });
+
+      $("modalOverlay").classList.add("open");
+    }
+
+    function closeModal(){
+      $("modalOverlay").classList.remove("open");
+    }
+
+
+function openStatusModal(UserID){
+  const u = userById(UserID);
+  if(!u) return;
+
+  const current = Number(u.Contacted ?? 0);
+  let selectedStatus = current; // ВАЖНО — объявлено в начале
+
+  const options = Object.entries(USER_STATUS)
+    .map(([value, label]) => `
+      <div 
+        class="statusOption status-${value} ${Number(value) === current ? "active" : ""}"
+        data-value="${value}">
+        ${label}
+      </div>
+    `).join("");
+
+  $("modalTitle").textContent = "Change user status";
+
+  $("modalBody").innerHTML = `
+    <div class="confirmList">
+      <div><strong>User:</strong> ${escapeHtml(u.UserName)}</div>
+    </div>
+    <div class="statusOptions">
+      ${options}
+    </div>
+  `;
+
+  // выбор статуса
+  setTimeout(() => {
+    document.querySelectorAll(".statusOption").forEach(el => {
+      el.onclick = () => {
+        document.querySelectorAll(".statusOption")
+          .forEach(x => x.classList.remove("active"));
+
+        el.classList.add("active");
+        selectedStatus = Number(el.dataset.value);
+      };
+    });
+  }, 0);
+
+  const footer = $("modalFooter");
+  footer.innerHTML = "";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "btn";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.onclick = closeModal;
+  footer.appendChild(cancelBtn);
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "btn primary";
+  saveBtn.textContent = "Save";
+
+  saveBtn.onclick = async () => {
+    try{
+      await apiFetch(`/users/${UserID}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: selectedStatus })
+      });
+
+      u.Contacted = selectedStatus;
+      closeModal();
+      render();
+
+    }catch(err){
+      console.error(err);
+      alert("Failed to update status");
+    }
+  };
+
+  footer.appendChild(saveBtn);
+  $("modalOverlay").classList.add("open");
+}
+
+
+
+    function openTextDetails(payloadJson){
+      let payload = null;
+      try{ payload = JSON.parse(payloadJson); } catch(e){ return; }
+
+      const u = userById(payload.userId);
+      const userName = u?.UserName || payload.userId;
+      const userContacts = payload.userId ? aggUserContacts(payload.userId) : { phone:"", email:"" };
+      const contactText = `${userContacts.phone ? "Phone: " + userContacts.phone : ""}${userContacts.phone && userContacts.email ? " / " : ""}${userContacts.email ? "Email: " + userContacts.email : ""}`.trim() || "-";
+      const groupName = payload.group || "—";
+      const groupUrl = payload.groupUrl || "";
+      const date = payload.date ? formatDateShort(payload.date) : "—";
+      const commentText = payload.commentText || (payload.kind === "comment" ? payload.text : "");
+      const postText = payload.postText || payload.textPost || (payload.kind === "post" ? payload.text : "");
+      const hasPostText = Boolean(postText && postText !== commentText);
+      const meta = `
+        <div class="confirmList">
+          <div><strong>User:</strong> ${escapeHtml(userName)} (${escapeHtml(payload.userId || userName)})</div>
+          <div><strong>Contacts:</strong> ${escapeHtml(contactText)}</div>
+          <div><strong>Date:</strong> ${escapeHtml(date)}</div>
+
+          ${payload.kind === "post" ? `
+            <div>
+              <strong>Comments count:</strong>
+              <span class="linkCell"
+                    onclick="openPostComments('${payload.postId}')">
+                ${escapeHtml(String(payload.commentsCount || 0))}
+              </span>
+            </div>
+          ` : ""}
+
+          <div><strong>Group:</strong> ${escapeHtml(groupName)}</div>
+        </div>
+      `;
+
+      // summary contact
+
+      const blocks = [];
+      if(payload.summary) blocks.push({ title: "Summary", text: payload.summary });
+      if(payload.kind === "comment" && commentText) blocks.push({ title: "Comment text", text: commentText });
+      if(payload.kind === "comment" && hasPostText) blocks.push({ title: "Post text", text: postText });
+      if(payload.kind === "post" && postText) blocks.push({ title: "Post text", text: postText });
+      
+      blocks.push({
+        title: "Notes",
+        html: `
+          <textarea
+            id="notesInput"
+            class="NotesTextarea"
+            placeholder="Write notes..."
+          >${escapeHtml(payload.notes || "")}</textarea>
+        `
+      });
+
+      const buttons = [];
+
+      if(payload.postUrl){
+        buttons.push({
+          label: "Open post",
+          className: "btn primary",
+          onClick: () => window.open(payload.postUrl, "_blank", "noopener")
+        });
+      }
+
+      if(groupUrl){
+        buttons.push({
+          label: "Open group",
+          className: "btn primary",
+          onClick: () => window.open(groupUrl, "_blank", "noopener")
+        });
+      }
+
+      if(u?.ProfileURL){
+        buttons.push({
+          label: "Open user profile",
+          className: "btn primary",
+          onClick: () => window.open(u.ProfileURL, "_blank", "noopener")
+        });
+      }
+
+buttons.push({
+  label: "Save notes",
+  className: "btn primary",
+  onClick: async () => {
+
+    const value = document.getElementById("notesInput")?.value || "";
+    console.log("OPEN PAYLOAD:", payload);
+    const id = payload.kind === "post"
+      ? payload.postId
+      : payload.commentId; 
+console.log("SAVE ID:", id);
+    await apiFetch(`/api/notes/${payload.kind}/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes: value })
+    });
+
+    // обновляем локальный объект
+    if (payload.kind === "post") {
+      const post = DB.Post.find(p => p.PostID === id);
+      if (post) post.notes = value;
+    } else {
+      const comment = DB.Comment.find(c => c.CommentID === id);
+      if (comment) comment.notes = value;
+    }
+
+    closeModal();
+    render();
+  }
+});
+
+      openModal({ title: payload.title || "Details", metaLineHtml: meta, blocks, buttons });
+    }
+
+    async function saveNotes(kind, postId, value) {
+      try {
+        const res = await fetch(`/api/notes/${kind}/${postId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ Notes: value })
+        });
+
+        if (!res.ok) throw new Error("Failed");
+
+        alert("Saved");
+      } catch (err) {
+        alert("Error saving Notes");
+      }
+    }
+
+    function openUserDetails(UserID){
+      const u = userById(UserID);
+      if(!u) return;
+      const contacts = aggUserContacts(UserID);
+      const contactText = `${contacts.phone ? "Phone: " + contacts.phone : ""}${contacts.phone && contacts.email ? " / " : ""}${contacts.email ? "Email: " + contacts.email : ""}`.trim() || "-";
+
+      openModal({
+        title: "User details",
+        metaLineHtml: `
+          <div class="confirmList">
+            <div><strong>User:</strong> ${escapeHtml(u.UserName)} (${escapeHtml(u.UserID)})</div>
+            <div><strong>Activity (2w):</strong> ${escapeHtml(String(u.Activity ?? 0))}</div>
+            <div><strong>Total posts:</strong> ${escapeHtml(String(u.PostsAllCount ?? 0))}</div>
+            <div><strong>Total comments:</strong> ${escapeHtml(String(u.CommsAllCount ?? 0))}</div>
+            <div><strong>Contacts:</strong> ${escapeHtml(contactText)}</div>
+          </div>
+        `,
+        blocks: [],
+        buttons: [
+          {
+            label:"Open profile",
+            className:"btn primary",
+            onClick: () => { if(u.ProfileURL) window.open(u.ProfileURL, "_blank", "noopener"); }
+          },
+          {
+            label: u.Contacted ? "Contacted" : "Not contacted",
+            className: u.Contacted ? "btn success" : "btn danger",
+            onClick: () => openContactedConfirm(u.UserID)
+          }
+        ],
+        modalClass: "narrow"
+      });
+    }
+
+    function closeAllFilterPopovers(){
+      document.querySelectorAll(".filterPopover.open").forEach(p => p.classList.remove("open"));
+    }
+
+    function toggleFilterPopover(id){
+      const pop = document.querySelector(`.filterPopover[data-filter-panel="${id}"]`);
+      if(!pop) return;
+      const isOpen = pop.classList.contains("open");
+      closeAllFilterPopovers();
+      if(!isOpen) pop.classList.add("open");
+    }
+
+    function applyAllHeaderFilter(kind){
+      const f = state.applied.all;
+      if(kind === "date"){
+        const val = document.querySelector('input[name="all_date_sort"]:checked')?.value || "newest";
+        f.dateSort = val;
+        if(val !== "none"){
+          f.landSort = "none";
+          f.priceSort = "none";
+          f.citySort = "none";
+        }
+      }
+      if(kind === "sellbuy"){
+        const noneChecked = document.querySelector('input[name="all_sellBuy_none"]')?.checked;
+        if(noneChecked){
+          f.sellBuy = ["sell","buy","unknown"];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="all_sellBuy"]:checked')).map(el => el.value);
+          f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
+        }
+      }
+      if(kind === "Location"){
+        const noneChecked = document.querySelector('input[name="all_Location_none"]')?.checked;
+        if(noneChecked){
+          f.cities = [];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="all_Location"]:checked')).map(el => el.value);
+          f.cities = vals;
+        }
+        const sortVal = document.querySelector('input[name="all_Location_sort"]:checked')?.value || "none";
+        f.citySort = sortVal;
+        if(sortVal !== "none"){
+          f.dateSort = "none";
+          f.landSort = "none";
+          f.priceSort = "none";
+        }
+      }
+      if(kind === "land"){
+        const val = document.querySelector('input[name="all_land_sort"]:checked')?.value || "none";
+        f.landSort = val;
+        if(val !== "none"){
+          f.priceSort = "none";
+          f.dateSort = "none";
+          f.citySort = "none";
+        }
+      }
+      if(kind === "price"){
+        const val = document.querySelector('input[name="all_price_sort"]:checked')?.value || "none";
+        f.priceSort = val;
+        f.priceMin = document.getElementById("all_price_min")?.value || "";
+        f.priceMax = document.getElementById("all_price_max")?.value || "";
+        if(val !== "none"){
+          f.landSort = "none";
+          f.dateSort = "none";
+          f.citySort = "none";
+        }
+      }
+      if(kind === "contacts"){
+        const val = document.querySelector('input[name="all_contacts"]:checked')?.value || "all";
+        f.contacts = val;
+      }
+      if (kind === "status") { // ✅ вот тут
+        const vals = Array.from(
+          document.querySelectorAll('input[name="all_status"]:checked')
+        ).map(el => Number(el.value));
+
+        f.status = vals; // лучше прямо в f
+      }
+
+      state.draft.all = JSON.parse(JSON.stringify(f));
+      closeAllFilterPopovers();
+      render();
+    }
+
+    function applyUsersHeaderFilter(kind){
+      const f = state.applied.users;
+      if (kind === "users_status") {
+      const vals = Array.from(
+        document.querySelectorAll('input[name="users_status"]:checked')
+      ).map(el => Number(el.value));
+
+      f.status = vals;
+    }
+
+
+      if(kind === "users_posts"){
+        const val = document.querySelector('input[name="users_posts_sort"]:checked')?.value || "none";
+        f.sort = val === "none" ? "newest" : (val === "asc" ? "posts_asc" : "posts_desc");
+      }
+      if(kind === "users_comments"){
+        const val = document.querySelector('input[name="users_comments_sort"]:checked')?.value || "none";
+        f.sort = val === "none" ? "newest" : (val === "asc" ? "comms_asc" : "comms_desc");
+      }
+      if(kind === "users_contacts"){
+        const val = document.querySelector('input[name="users_contacts"]:checked')?.value || "all";
+        f.contacts = val;
+      }
+      if(kind === "users_contacted"){
+        const val = document.querySelector('input[name="users_contacted"]:checked')?.value || "all";
+        f.contacted = val;
+      }
+      state.draft.users = JSON.parse(JSON.stringify(f));
+      closeAllFilterPopovers();
+      render();
+    }
+
+    function applyPostsHeaderFilter(kind){
+      const f = state.applied[state.view] || state.applied.posts;
+      if(kind === "posts_date"){
+        f.dateSort = document.querySelector('input[name="posts_date_sort"]:checked')?.value || "newest";
+        if(f.dateSort !== "none"){
+          f.landSort = "none";
+          f.priceSort = "none";
+          f.citySort = "none";
+          f.commentsSort = "none";
+        }
+      }
+      if(kind === "posts_sellbuy"){
+        const noneChecked = document.querySelector('input[name="posts_sellBuy_none"]')?.checked;
+        if(noneChecked){
+          f.sellBuy = ["sell","buy","unknown"];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="posts_sellBuy"]:checked')).map(el => el.value);
+          f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
+        }
+      }
+      if(kind === "posts_Location"){
+        const noneChecked = document.querySelector('input[name="posts_Location_none"]')?.checked;
+        if(noneChecked){
+          f.cities = [];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="posts_Location"]:checked')).map(el => el.value);
+          f.cities = vals;
+        }
+        const sortVal = document.querySelector('input[name="posts_Location_sort"]:checked')?.value || "none";
+        f.citySort = sortVal;
+        if(sortVal !== "none"){
+          f.dateSort = "none";
+          f.landSort = "none";
+          f.priceSort = "none";
+          f.commentsSort = "none";
+        }
+      }
+      if(kind === "posts_land"){
+        const val = document.querySelector('input[name="posts_land_sort"]:checked')?.value || "none";
+        f.landSort = val;
+        if(val !== "none"){
+          f.priceSort = "none";
+          f.dateSort = "none";
+          f.citySort = "none";
+          f.commentsSort = "none";
+        }
+      }
+      if(kind === "posts_price"){
+        const val = document.querySelector('input[name="posts_price_sort"]:checked')?.value || "none";
+        f.priceSort = val;
+        f.priceMin = document.getElementById("posts_price_min")?.value || "";
+        f.priceMax = document.getElementById("posts_price_max")?.value || "";
+        if(val !== "none"){
+          f.landSort = "none";
+          f.dateSort = "none";
+          f.citySort = "none";
+          f.commentsSort = "none";
+        }
+      }
+      if(kind === "posts_comments"){
+        const val = document.querySelector('input[name="posts_comments_sort"]:checked')?.value || "none";
+        f.commentsSort = val;
+        if(val !== "none"){
+          f.dateSort = "none";
+          f.citySort = "none";
+          f.landSort = "none";
+          f.priceSort = "none";
+        }
+      }
+      if(kind === "posts_contacts"){
+        const val = document.querySelector('input[name="posts_contacts"]:checked')?.value || "all";
+        f.contacts = val;
+      }
+      if (kind === "posts_status") {
+          const vals = Array.from(
+            document.querySelectorAll('input[name="posts_status"]:checked')
+          ).map(el => Number(el.value));
+
+          f.status = vals;
+        }
+
+      state.applied.posts = JSON.parse(JSON.stringify(f));
+      state.draft.posts   = JSON.parse(JSON.stringify(f));
+      state.draft.posts = JSON.parse(JSON.stringify(f));
+      closeAllFilterPopovers();
+      render();
+    }
+
+    function applyCommentsHeaderFilter(kind){
+      const f = state.applied.comments;
+      if(kind === "comments_date"){
+        f.dateSort = document.querySelector('input[name="comments_date_sort"]:checked')?.value || "newest";
+        if(f.dateSort !== "none"){
+          f.landSort = "none";
+          f.priceSort = "none";
+          f.citySort = "none";
+        }
+      }
+      if(kind === "comments_sellbuy"){
+        const noneChecked = document.querySelector('input[name="comments_sellBuy_none"]')?.checked;
+        if(noneChecked){
+          f.sellBuy = ["sell","buy","unknown"];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="comments_sellBuy"]:checked')).map(el => el.value);
+          f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
+        }
+      }
+      if(kind === "comments_Location"){
+        const noneChecked = document.querySelector('input[name="comments_Location_none"]')?.checked;
+        if(noneChecked){
+          f.cities = [];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="comments_Location"]:checked')).map(el => el.value);
+          f.cities = vals;
+        }
+        const sortVal = document.querySelector('input[name="comments_Location_sort"]:checked')?.value || "none";
+        f.citySort = sortVal;
+        if(sortVal !== "none"){
+          f.dateSort = "none";
+          f.landSort = "none";
+          f.priceSort = "none";
+        }
+      }
+      if(kind === "comments_land"){
+        const val = document.querySelector('input[name="comments_land_sort"]:checked')?.value || "none";
+        f.landSort = val;
+        if(val !== "none"){
+          f.priceSort = "none";
+          f.dateSort = "none";
+          f.citySort = "none";
+        }
+      }
+      if(kind === "comments_price"){
+        const val = document.querySelector('input[name="comments_price_sort"]:checked')?.value || "none";
+        f.priceSort = val;
+        f.priceMin = document.getElementById("comments_price_min")?.value || "";
+        f.priceMax = document.getElementById("comments_price_max")?.value || "";
+        if(val !== "none"){
+          f.landSort = "none";
+          f.dateSort = "none";
+          f.citySort = "none";
+        }
+      }
+      if(kind === "comments_contacts"){
+        const val = document.querySelector('input[name="comments_contacts"]:checked')?.value || "all";
+        f.contacts = val;
+      }
+      if (kind === "comments_status") {
+        const vals = Array.from(
+          document.querySelectorAll('input[name="comments_status"]:checked')
+        ).map(el => Number(el.value));
+
+        f.status = vals;
+      }
+
+      state.draft.comments = JSON.parse(JSON.stringify(f));
+      closeAllFilterPopovers();
+      render();
+    }
+
+    // ------------------------
+    // Events
+    // ------------------------
+    function wireEvents(){
+      // Sidebar toggle
+      $("sidebarToggle").addEventListener("click", () => {
+        if(window.matchMedia("(max-width: 720px)").matches){
+          state.mobileSidebarOpen = !state.mobileSidebarOpen;
+          $("sidebar").classList.toggle("mobileOpen", state.mobileSidebarOpen);
+        } else {
+          state.sidebarCollapsed = !state.sidebarCollapsed;
+          $("sidebar").classList.toggle("collapsed", state.sidebarCollapsed);
+        }
+      });
+
+      // Nav
+      $("nav").addEventListener("click", (e) => {
+        const item = e.target.closest(".navItem");
+        if(!item) return;
+
+        const view = item.dataset.view;
+
+        state.view = view;
+        if (state.pagination?.[view]) {
+          state.pagination[view].page = 1;
+        }
+
+        // close mobile sidebar on nav
+        if(window.matchMedia("(max-width: 720px)").matches){
+          state.mobileSidebarOpen = false;
+          $("sidebar").classList.remove("mobileOpen");
+        }
+
+        render();
+      });
+
+      // Filters toggle
+      const filtersToggle = $("filtersToggle");
+      if(filtersToggle){
+        filtersToggle.addEventListener("click", () => {
+          state.filtersOpen = !state.filtersOpen;
+          render();
+        });
+      }
+
+      // Apply
+      const applyBtn = $("applyBtn");
+      if(applyBtn) applyBtn.addEventListener("click", () => applyFilters());
+
+      // Reset
+      $("resetBtn").addEventListener("click", () => resetFilters());
+
+      const globalSearchApply = $("globalSearchApply");
+
+      if (globalSearchApply) {
+        globalSearchApply.addEventListener("click", (e) => {
+          e.preventDefault();
+
+          const value = $("globalSearch")?.value || "";
+          const view = state.view;
+
+          if (view === "all") {
+            state.applied.all.query = value;
+            state.draft.all = structuredClone(state.applied.all);
+          }
+
+          else if (view === "users") {
+            state.applied.users.q = value;
+            state.draft.users = structuredClone(state.applied.users);
+          }
+
+          else if (view === "posts") {
+            state.applied.posts.q = value;
+            state.draft.posts = structuredClone(state.applied.posts);
+          }
+
+          else if (view === "comments") {
+            state.applied.comments.q = value;
+            state.draft.comments = structuredClone(state.applied.comments);
+          }
+
+          else if (view === "trash") {
+            state.applied.trash.q = value;
+            state.draft.trash = structuredClone(state.applied.trash);
+          }
+
+          state.pagination[view].page = 1;
+          render();
+        });
+      }
+
+
+      if(globalSearch){
+        globalSearch.addEventListener("keydown", (e) => {
+          if(e.key === "Enter"){
+            e.preventDefault();
+            const btn = $("globalSearchApply");
+            if(btn) btn.click();
+          }
+        });
+      }
+
+      // Delegated actions
+      document.addEventListener("click", (e) => {
+        const actionEl = e.target.closest("[data-action]");
+        if(!actionEl) return;
+
+        const action = actionEl.dataset.action;
+
+        if(action === "openLink"){
+          const url = actionEl.dataset.url;
+          if(url) window.open(url, "_blank", "noopener");
+          return;
+        }
+
+        if(action === "changeStatus"){
+          openStatusModal(actionEl.dataset.user);
+          return;
+        }
+
+        if(action === "openTextModal"){
+          openTextDetails(actionEl.dataset.payload);
+          return;
+        }
+
+        if(action === "openUserDetails"){
+          openUserDetails(actionEl.dataset.user);
+          return;
+        }
+
+        if(action === "jumpToPosts"){
+          e.preventDefault();
+          const uid = actionEl.dataset.user;
+          const u = userById(uid);
+          state.userFocus = { UserID: uid, UserName: u?.UserName || uid };
+          state.view = "posts";
+          render();
+          return;
+        }
+
+        if(action === "jumpToComments"){
+          e.preventDefault();
+          const uid = actionEl.dataset.user;
+          const u = userById(uid);
+          state.userFocus = { UserID: uid, UserName: u?.UserName || uid };
+          state.view = "comments";
+          render();
+          return;
+        }
+
+        if(action === "clearUserFocus"){
+          state.userFocus = null;
+          render();
+          return;
+        }
+      });
+
+      document.addEventListener("click", (e) => {
+        const filterBtn = e.target.closest("[data-filter-btn]");
+        if(filterBtn){
+          e.preventDefault();
+          e.stopPropagation();
+          toggleFilterPopover(filterBtn.dataset.filterBtn);
+          return;
+        }
+        const applyBtn = e.target.closest("[data-filter-apply]");
+        if(applyBtn){
+          e.preventDefault();
+          e.stopPropagation();
+          const key = applyBtn.dataset.filterApply;
+          if(key.startsWith("users_")) applyUsersHeaderFilter(key);
+          else if(key.startsWith("posts_")) applyPostsHeaderFilter(key);
+          else if(key.startsWith("comments_")) applyCommentsHeaderFilter(key);
+          else applyAllHeaderFilter(key);
+          applyBtn.classList.remove("active");
+          return;
+        }
+        const cancelBtn = e.target.closest("[data-filter-cancel]");
+        if(cancelBtn){
+          e.preventDefault();
+          e.stopPropagation();
+          const pop = cancelBtn.closest(".filterPopover");
+          if(pop){
+            const apply = pop.querySelector("[data-filter-apply]");
+            if(apply) apply.classList.remove("active");
+          }
+          closeAllFilterPopovers();
+          return;
+        }
+        const actionBtn = e.target.closest("[data-filter-action]");
+        if(actionBtn){
+          e.preventDefault();
+          e.stopPropagation();
+          const action = actionBtn.dataset.filterAction;
+          if(action === "sellbuy_all"){
+            document.querySelectorAll('input[name="all_sellBuy"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="all_sellBuy_none"]'); if(no) no.checked = false;
+          }
+          if(action === "sellbuy_none"){
+            document.querySelectorAll('input[name="all_sellBuy"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="all_sellBuy_none"]'); if(no) no.checked = false;
+          }
+          if(action === "Location_all"){
+            document.querySelectorAll('input[name="all_Location"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="all_Location_none"]'); if(no) no.checked = false;
+          }
+          if(action === "Location_none"){
+            document.querySelectorAll('input[name="all_Location"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="all_Location_none"]'); if(no) no.checked = false;
+          }
+          if(action === "posts_sellbuy_all"){
+            document.querySelectorAll('input[name="posts_sellBuy"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="posts_sellBuy_none"]'); if(no) no.checked = false;
+          }
+          if(action === "posts_sellbuy_none"){
+            document.querySelectorAll('input[name="posts_sellBuy"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="posts_sellBuy_none"]'); if(no) no.checked = false;
+          }
+          if(action === "posts_Location_all"){
+            document.querySelectorAll('input[name="posts_Location"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="posts_Location_none"]'); if(no) no.checked = false;
+          }
+          if(action === "posts_Location_none"){
+            document.querySelectorAll('input[name="posts_Location"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="posts_Location_none"]'); if(no) no.checked = false;
+          }
+          if(action === "comments_sellbuy_all"){
+            document.querySelectorAll('input[name="comments_sellBuy"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="comments_sellBuy_none"]'); if(no) no.checked = false;
+          }
+          if(action === "comments_sellbuy_none"){
+            document.querySelectorAll('input[name="comments_sellBuy"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="comments_sellBuy_none"]'); if(no) no.checked = false;
+          }
+          if(action === "comments_Location_all"){
+            document.querySelectorAll('input[name="comments_Location"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="comments_Location_none"]'); if(no) no.checked = false;
+          }
+          if(action === "comments_Location_none"){
+            document.querySelectorAll('input[name="comments_Location"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="comments_Location_none"]'); if(no) no.checked = false;
+          }
+          return;
+        }
+        if(e.target.closest(".filterPopover")) return;
+        closeAllFilterPopovers();
+      });
+
+      document.addEventListener("input", (e) => {
+        const pop = e.target.closest(".filterPopover");
+        if(pop){
+          const apply = pop.querySelector("[data-filter-apply]");
+          if(apply) apply.classList.add("active");
+        }
+        if(e.target && e.target.id === "all_Location_search"){
+          const q = e.target.value.trim().toLowerCase();
+          const items = document.querySelectorAll("[data-Location-option]");
+          items.forEach(el => {
+            const name = (el.getAttribute("data-Location-option") || "").toLowerCase();
+            el.style.display = !q || name.includes(q) ? "" : "none";
+          });
+        }
+        if(e.target && e.target.id === "posts_Location_search"){
+          const q = e.target.value.trim().toLowerCase();
+          const items = document.querySelectorAll("[data-Location-option]");
+          items.forEach(el => {
+            const name = (el.getAttribute("data-Location-option") || "").toLowerCase();
+            el.style.display = !q || name.includes(q) ? "" : "none";
+          });
+        }
+        if(e.target && e.target.id === "comments_Location_search"){
+          const q = e.target.value.trim().toLowerCase();
+          const items = document.querySelectorAll("[data-Location-option]");
+          items.forEach(el => {
+            const name = (el.getAttribute("data-Location-option") || "").toLowerCase();
+            el.style.display = !q || name.includes(q) ? "" : "none";
+          });
+        }
+        if(e.target && e.target.name === "all_sellBuy_none"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="all_sellBuy"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "all_Location_none"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="all_Location"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "posts_sellBuy_none"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="posts_sellBuy"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "posts_Location_none"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="posts_Location"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "comments_sellBuy_none"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="comments_sellBuy"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "comments_Location_none"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="comments_Location"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "all_sellBuy"){
+          const no = document.querySelector('input[name="all_sellBuy_none"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "all_Location"){
+          const no = document.querySelector('input[name="all_Location_none"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "posts_sellBuy"){
+          const no = document.querySelector('input[name="posts_sellBuy_none"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "posts_Location"){
+          const no = document.querySelector('input[name="posts_Location_none"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "comments_sellBuy"){
+          const no = document.querySelector('input[name="comments_sellBuy_none"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "comments_Location"){
+          const no = document.querySelector('input[name="comments_Location_none"]');
+          if(no) no.checked = false;
+        }
+      });
+
+      // Modal close
+      $("modalClose").addEventListener("click", closeModal);
+      $("modalOverlay").addEventListener("click", (e) => {
+        if(e.target === $("modalOverlay")) closeModal();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if(e.key === "Escape") closeModal();
+      });
+
+      // Close mobile sidebar if clicking outside
+      document.addEventListener("click", (e) => {
+        if(!window.matchMedia("(max-width: 720px)").matches) return;
+        const sidebar = $("sidebar");
+        const clickedInside = sidebar.contains(e.target) || e.target.id === "sidebarToggle" || e.target.closest("#sidebarToggle");
+        if(state.mobileSidebarOpen && !clickedInside){
+          state.mobileSidebarOpen = false;
+          sidebar.classList.remove("mobileOpen");
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        requestAnimationFrame(() => detectOverflowAndToggleMore());
+      });
+    }
+    (function init(){
+      wireEvents();
+      render();
+    })();
+  </script>
+
+
+</body>
+</html>

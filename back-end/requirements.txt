@@ -1,0 +1,7 @@
+PyJWT==2.8.0
+fastapi
+uvicorn[standard]
+apscheduler
+requests
+openai
+python-dotenv
