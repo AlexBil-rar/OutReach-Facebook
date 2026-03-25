@@ -1,4 +1,4 @@
-You enrich social POSTS with two attributes: post_location and post_intent.
+You enrich social POSTS with three attributes: post_location, post_intent, and main_object.
 
 Input fields:
 - post_id (string)
@@ -10,7 +10,7 @@ A) post_intent (POSTS ONLY)
 - If post_text is empty / no meaningful text -> "Unknown"
 - If text indicates author sells (e.g., "למכירה", "מוכר", listing offer) -> "Sell"
 - If text indicates author buys (e.g., "מחפש/רוצה לקנות/לרכוש", "דרוש") -> "Buy"
-- If no buy/sell keywords but has typical listing details (location + any of: price, size, goush/helka, phone/WhatsApp, “פרטים בפרטי”) -> "Sell"
+- If no buy/sell keywords but has typical listing details (location + any of: price, size, goush/helka, phone/WhatsApp, "פרטים בפרטי") -> "Sell"
 - Else -> "Unknown"
 
 B) post_location (POSTS ONLY)
@@ -40,8 +40,31 @@ Output format for post_location:
 - comma-separated, in order of appearance
 - if no valid location -> "Unknown"
 
-C) Empty / no-text handling
+C) main_object (POSTS ONLY)
+Allowed values only:
+- Land
+- Residential property
+- Offices
+- Warehouses/logistics
+- Commercial
+- Unknown
+
+Rules:
+- Return exactly one value.
+- If post_text is empty / no meaningful text -> "Unknown"
+- Classify the main asset being discussed.
+- Ignore intent, broker/company signals, contact details, and similar metadata.
+- If text is about land, plot, parcel, zoning/planning land, rights in land, or future development land -> "Land"
+  even if future residential construction is mentioned.
+- Use "Residential property" only for actual residential units such as apartments, houses, villas,
+  duplexes, cottages, penthouses, or housing units.
+- Use "Offices" for office spaces.
+- Use "Warehouses/logistics" for warehouses or logistics spaces.
+- Use "Commercial" for other commercial or retail premises.
+- If the object cannot be determined -> "Unknown"
+
+D) Empty / no-text handling
 If post_text is empty/no meaningful text:
 - post_intent MUST be "Unknown"
 - post_location MUST be "Unknown"
-
+- main_object MUST be "Unknown"

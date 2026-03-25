@@ -10,9 +10,20 @@ COMMENT_SCHEMA = {
             "comment_intent": {
                 "type": "string",
                 "enum": ["Sell", "Buy", "Unknown"]
+            },
+            "comment_main_object": {
+                "type": "string",
+                "enum": [
+                    "Land",
+                    "Residential property",
+                    "Offices",
+                    "Warehouses/logistics",
+                    "Commercial",
+                    "Unknown"
+                ]
             }
         },
-        "required": ["comment_id", "comment_location", "comment_intent"],
+        "required": ["comment_id", "comment_location", "comment_intent", "comment_main_object"],
         "additionalProperties": False
     }
 }

@@ -22,7 +22,7 @@ def fetch_posts(limit: int | None = None):
             rowid AS post_id,
             text
         FROM Post
-        WHERE post_sell_or_buy IS NULL
+        WHERE (post_sell_or_buy IS NULL OR post_city IS NULL OR main_object IS NULL)
           AND text IS NOT NULL
           AND TRIM(text) != ''
     """
@@ -36,7 +36,7 @@ def fetch_posts(limit: int | None = None):
     return rows
 
 
-def update_post_enrichment(post_id: int, location: str, intent: str):
+def update_post_enrichment(post_id: int, location: str, intent: str, main_object: str):
     conn = get_connection()
     cur = conn.cursor()
 
@@ -45,10 +45,11 @@ def update_post_enrichment(post_id: int, location: str, intent: str):
         UPDATE Post
         SET
             post_city = ?,
-            post_sell_or_buy = ?
+            post_sell_or_buy = ?,
+            main_object = ?
         WHERE rowid = ?
         """,
-        (location, intent, post_id)
+        (location, intent, main_object, post_id)
     )
 
     conn.commit()
@@ -71,7 +72,7 @@ def fetch_comments(limit: int | None = None):
             p.text            AS post_text
         FROM Comment c
         JOIN Post p ON p.id = c.post_ref_id
-        WHERE c.comment_sell_or_buy IS NULL
+        WHERE (c.comment_sell_or_buy IS NULL OR c.comment_city IS NULL OR c.comment_main_object IS NULL)
           AND c.text IS NOT NULL
           AND TRIM(c.text) != ''
     """
@@ -89,7 +90,8 @@ def update_comment_enrichment(
     post_id: int,
     user_id: int,
     location: str,
-    intent: str
+    intent: str,
+    main_object: str
 ):
     conn = get_connection()
     cur = conn.cursor()
@@ -99,11 +101,12 @@ def update_comment_enrichment(
         UPDATE Comment
         SET
             comment_city = ?,
-            comment_sell_or_buy = ?
+            comment_sell_or_buy = ?,
+            comment_main_object = ?
         WHERE post_ref_id = ?
           AND user_ref_id = ?
         """,
-        (location, intent, post_id, user_id)
+        (location, intent, main_object, post_id, user_id)
     )
 
     conn.commit()

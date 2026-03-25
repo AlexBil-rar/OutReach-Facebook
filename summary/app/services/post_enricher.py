@@ -30,6 +30,7 @@ def enrich_post(post_id: str, post_text: str) -> dict:
             "post_id": post_id,
             "post_location": "Unknown",
             "post_intent": "Unknown",
+            "main_object": "Unknown",
         }
 
     if not isinstance(result, dict):
@@ -38,11 +39,12 @@ def enrich_post(post_id: str, post_text: str) -> dict:
             "post_id": post_id,
             "post_location": "Unknown",
             "post_intent": "Unknown",
+            "main_object": "Unknown",
         }
 
     return {
         "post_id": post_id,
         "post_location": result.get("post_location", "Unknown"),
         "post_intent": result.get("post_intent", "Unknown"),
+        "main_object": result.get("main_object", "Unknown"),
     }
-

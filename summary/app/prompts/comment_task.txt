@@ -1,4 +1,4 @@
-Task: Enrich a social COMMENT with two attributes: comment_location and comment_intent.
+Task: Enrich a social COMMENT with three attributes: comment_location, comment_intent, and comment_main_object.
 
 Input (JSON):
 - comment_id (string)
@@ -10,20 +10,21 @@ Return ONLY a single JSON object with EXACT keys:
 {
   "comment_id": "<same as input>",
   "comment_location": "<Hebrew locations or 'Unknown'>",
-  "comment_intent": "Sell" | "Buy" | "Unknown"
+  "comment_intent": "Sell" | "Buy" | "Unknown",
+  "comment_main_object": "Land" | "Residential property" | "Offices" | "Warehouses/logistics" | "Commercial" | "Unknown"
 }
 No extra keys. No explanations. No additional text.
 
-A) comment_intent (Sell / Buy / Unknown)  [COMMENTS ONLY]
+A) comment_intent (Sell / Buy / Unknown)
 
 Rules:
 - If comment_text is empty / no meaningful text -> comment_intent = "Unknown".
 - Determine intent using BOTH post_text and comment_text; if post_text is empty -> use comment_text only.
-- If post is Sell AND comment asks price/details, leaves contact, asks to be contacted, “call me”, etc. -> comment_intent = "Buy".
-- If post is Buy AND comment offers something for sale (e.g., “יש לי”, “למכירה”, “מוכר”, gives plot/price/phone as an offer) -> comment_intent = "Sell".
+- If post is Sell AND comment asks price/details, leaves contact, asks to be contacted, "call me", etc. -> comment_intent = "Buy".
+- If post is Buy AND comment offers something for sale (e.g., "יש לי", "למכירה", "מוכר", gives plot/price/phone as an offer) -> comment_intent = "Sell".
 - If cannot determine -> comment_intent = "Unknown".
 
-B) comment_location  [COMMENTS ONLY]
+B) comment_location
 
 Rules:
 Output format:
@@ -55,13 +56,38 @@ Fallback rule (COMMENTS ONLY):
 3) Otherwise, extract locations from post_text and output those.
 4) If neither contains a valid location → output exactly "Unknown".
 
-C) Empty / no-text handling
+C) comment_main_object
+
+Allowed values:
+- Land
+- Residential property
+- Offices
+- Warehouses/logistics
+- Commercial
+- Unknown
+
+Rules:
+1. Return exactly one label from the allowed values.
+2. First classify based on comment_text.
+3. If the comment alone is not enough to determine the main object, use post_text as fallback context.
+4. If the object still cannot be determined, return "Unknown".
+5. Classify the main asset being discussed, offered, requested, or implied.
+6. Ignore intent, broker/company signals, contact details, and similar metadata.
+7. If the text is about land, plot, parcel, zoning, planning, rights in land, or future development land, return "Land" even if future residential construction is mentioned.
+8. Use "Residential property" only for actual residential units such as apartments, houses, villas, duplexes, cottages, penthouses, or housing units.
+9. Use "Offices" for office spaces.
+10. Use "Warehouses/logistics" for warehouses or logistics spaces.
+11. Use "Commercial" for other commercial or retail premises.
+
+D) Empty / no-text handling
 
 If comment_text is empty/no meaningful text:
 - comment_intent MUST be "Unknown"
 - comment_location MUST be:
   - If post_text has valid locations -> use fallback step 3 (post_text locations)
   - Otherwise -> "Unknown"
+- comment_main_object MUST be:
+  - If post_text allows classification -> use post_text
+  - Otherwise -> "Unknown"
 
 Return ONLY the final JSON object.
-

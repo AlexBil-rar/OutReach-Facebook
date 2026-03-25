@@ -35,6 +35,7 @@ def enrich_comment(
         return {
             "comment_location": "Unknown",
             "comment_intent": "Unknown",
+            "comment_main_object": "Unknown",
         }
 
     if not isinstance(result, dict):
@@ -42,9 +43,11 @@ def enrich_comment(
         return {
             "comment_location": "Unknown",
             "comment_intent": "Unknown",
+            "comment_main_object": "Unknown",
         }
 
     return {
         "comment_location": result.get("comment_location", "Unknown"),
         "comment_intent": result.get("comment_intent", "Unknown"),
+        "comment_main_object": result.get("comment_main_object", "Unknown"),
     }

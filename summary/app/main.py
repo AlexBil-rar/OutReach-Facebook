@@ -38,6 +38,7 @@ def run_posts():
                     post_id=post_id,
                     location="Unknown",
                     intent="Unknown",
+                    main_object="Unknown",
                 )
                 continue
 
@@ -51,9 +52,10 @@ def run_posts():
                 post_id=post_id,
                 location=result["post_location"],
                 intent=result["post_intent"],
+                main_object=result["main_object"],
             )
 
-            print(f"[POST {idx}] OK {post_id} → {result['post_intent']}")
+            print(f"[POST {idx}] OK {post_id} → intent={result['post_intent']}, object={result['main_object']}")
             print(result)
             time.sleep(RATE_LIMIT_SEC)
 
@@ -83,9 +85,10 @@ def run_comments():
                 user_id=user_id,
                 location=result["comment_location"],
                 intent=result["comment_intent"],
+                main_object=result["comment_main_object"],
             )
 
-            print(f"[COM {idx}] OK {key} → {result['comment_intent']}")
+            print(f"[COM {idx}] OK {key} → intent={result['comment_intent']}, object={result['comment_main_object']}")
             time.sleep(RATE_LIMIT_SEC)
 
         except Exception as e:
