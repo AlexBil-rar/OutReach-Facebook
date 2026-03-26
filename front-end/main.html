@@ -1503,21 +1503,21 @@ const DB = {
         trash: { page: 1, pageSize: 50 }
       },
 
-        draft: {
-          all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
-          users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest",status:[] },
-          posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
-          comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
-          trash: { dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
-        },
+      draft: {
+        all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest",status:[] },
+        posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+        comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        trash: { dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+      },
 
-        applied: {
-          all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[0,1,2,3,4] },
-          users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest", status:[0,1,2,3,4] },
-          posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
-          comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
-          trash:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
-        },
+      applied: {
+        all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[0,1,2,3,4] },
+        users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest", status:[0,1,2,3,4] },
+        posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+        comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        trash:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+      },
 
         
     };
@@ -1540,6 +1540,9 @@ const DB = {
         3: "Negative response",
         4: "Positive response"
       };
+
+      const MAIN_OBJECT_ALL = ["Land", "Residential property", "Offices", "Warehouses/logistics", "Commercial", "Unknown"];
+
 
 
     // ------------------------
@@ -3440,6 +3443,13 @@ function applyAllFilters(rows){
     if (!matchesSellBuySet(r.SellOrBuy, sellSet))
       return false;
 
+    // MAIN OBJECT
+    const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+    if (mainObjectSet.size < MAIN_OBJECT_ALL.length) {
+      const obj = r.Main_object || "Unknown";
+      if (!mainObjectSet.has(obj)) return false;
+    }
+
     // CITY
     if (citySet.size) {
       const city = getAllRowCity(r);
@@ -3677,6 +3687,13 @@ function applyUsersFilters() {
     const intent = (p.SellOrBuy || p.SellBuy || "unknown").toLowerCase();
     if(!matchesSellBuySet(intent, sellSet)) return false;
 
+    // MAIN OBJECT
+    const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+    if (mainObjectSet.size < MAIN_OBJECT_ALL.length) {
+      const obj = p.Main_object || "Unknown";
+      if (!mainObjectSet.has(obj)) return false;
+    }
+
     if(citySet.size){
       const city = p.City || "-";
       if(!citySet.has(city)) return false;
@@ -3789,6 +3806,12 @@ function applyCommentsFilters(){
         return false;
     }
 
+    // MAIN OBJECT
+    const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+    if (mainObjectSet.size < MAIN_OBJECT_ALL.length) {
+      const obj = c.Main_object || "Unknown";
+      if (!mainObjectSet.has(obj)) return false;
+    }
 
     // 🎯 INTENT (берём из комментария ИЛИ поста)
     if (sellSet.length) {
@@ -3887,6 +3910,35 @@ function renderStatusBody(filterKey, selectedStatuses = [], noFilter = false) {
   `;
 }
 
+function renderMainObjectBody(filterKey, selectedValues = []) {
+  const selected = new Set(
+    selectedValues.length ? selectedValues : MAIN_OBJECT_ALL
+  );
+ 
+  const checks = MAIN_OBJECT_ALL.map(v => `
+    <label class="filterOption">
+      <input type="checkbox"
+             name="${filterKey}"
+             value="${escapeHtml(v)}"
+             ${selected.has(v) ? "checked" : ""}>
+      ${escapeHtml(v)}
+    </label>
+  `).join("");
+ 
+  return `
+    <div class="filterTools">
+      <button class="btn small ghost" data-filter-action="${filterKey}_all">Select all</button>
+      <button class="btn small ghost" data-filter-action="${filterKey}_none">Clear all</button>
+      <label class="filterOption">
+        <input type="checkbox" name="${filterKey}_nofilter">No filter
+      </label>
+    </div>
+    <div class="filterList">${checks}</div>
+  `;
+}
+
+
+
     // ------------------------
     // Table renderers
     // ------------------------
@@ -3921,6 +3973,9 @@ function renderAllTable(rows){
   const isContactsActive  = f.contacts !== "all";
   const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
 
+  const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+  const isMainObjectActive = mainObjectSet.size < MAIN_OBJECT_ALL.length;
+  const mainObjectBody = renderMainObjectBody("all_mainObject", f.mainObject || []);
 
   const statusBody = renderStatusBody(
   "all_status",
@@ -4024,6 +4079,14 @@ function renderAllTable(rows){
               ${renderFilterBtn("sellbuy", isSellBuyActive)}
             </div>
             ${renderFilterPopover("sellbuy", "Intent", sellBuyBody)}
+          </th>
+
+          <th class="center thFilter">
+            <div class="thFilterWrap">
+              <span>Object</span>
+              ${renderFilterBtn("all_mainObject", isMainObjectActive)}
+            </div>
+            ${renderFilterPopover("all_mainObject", "Main Object", mainObjectBody)}
           </th>
 
           <th class="center thFilter">
@@ -4199,6 +4262,11 @@ if (r.Type === "post") {
         ${escapeHtml(intent)}
       </td>
 
+      <!-- OBJECT -->
+      <td class="center nowrap">
+        ${escapeHtml(r.Main_object || "-")}
+      </td>
+
       <!-- CITY -->
       <td class="center nowrap">
         ${escapeHtml(city)}
@@ -4372,6 +4440,11 @@ document.addEventListener("click", async (e) => {
       const isContactedActive = f.contacted !== "all";
       const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
 
+      const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+      const isMainObjectActive = mainObjectSet.size < MAIN_OBJECT_ALL.length;
+      const mainObjectBody = renderMainObjectBody("posts_mainObject", f.mainObject || []);
+      
+
       const statusBody = renderStatusBody(
         "users_status",
         state.applied.users.status ?? []
@@ -4494,6 +4567,11 @@ function renderPostsTable(rows){
       const isContactedActive = f.contacted !== "all";
       const isStatusActive = Array.isArray(f.status) && f.status.length > 0;
 
+
+      const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+      const isMainObjectActive = mainObjectSet.size < MAIN_OBJECT_ALL.length;
+      const mainObjectBody = renderMainObjectBody("posts_mainObject", f.mainObject || []);
+
       const statusBody = renderStatusBody(
         "posts_status",
         state.applied.posts.status ?? null
@@ -4584,6 +4662,14 @@ function renderPostsTable(rows){
                 ${renderFilterPopover("posts_sellbuy", "Intent", sellBuyBody)}
               </th>
 
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Object</span>
+                  ${renderFilterBtn("posts_mainObject", isMainObjectActive)}
+                </div>
+                ${renderFilterPopover("posts_mainObject", "Main Object", mainObjectBody)}
+              </th>
+
               <th class="thFilter">
                 <div class="thFilterWrap">
                   <span>Location</span>
@@ -4666,6 +4752,9 @@ function renderPostsTable(rows){
                       )}
                     </td>
 
+                    <td class="center nowrap">${escapeHtml(p.Main_object || "-")}</td>
+
+
                     <td class="nowrap">${escapeHtml(p.City || "-")}</td>
                     <td>${renderContactsCell(p)}</td>
 
@@ -4739,8 +4828,9 @@ function renderCommentsTable(rows){
         state.applied.comments.status ?? null
       );
 
-
-
+      const mainObjectSet = new Set(f.mainObject || MAIN_OBJECT_ALL);
+      const isMainObjectActive = mainObjectSet.size < MAIN_OBJECT_ALL.length;
+      const mainObjectBody = renderMainObjectBody("comments_mainObject", f.mainObject || []);
 
       const sellBuyChecks = sellBuyAll.map(v => {
         const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
@@ -4815,6 +4905,16 @@ function renderCommentsTable(rows){
                 </div>
                 ${renderFilterPopover("comments_sellbuy", "Intent", sellBuyBody)}
               </th>
+
+
+              <th class="center thFilter">
+                <div class="thFilterWrap">
+                  <span>Object</span>
+                  ${renderFilterBtn("comments_mainObject", isMainObjectActive)}
+                </div>
+                ${renderFilterPopover("comments_mainObject", "Main Object", mainObjectBody)}
+              </th>
+ 
 
               <th class="thFilter">
                 <div class="thFilterWrap">
@@ -4921,6 +5021,7 @@ function renderCommentsTable(rows){
                     <td class="center nowrap">
                       ${escapeHtml(friendlySellBuy(c.Intent ?? c.SellOrBuy ?? c.SellBuy ?? "unknown"))}
                     </td>
+                    <td class="center nowrap">${escapeHtml(c.Main_object || "-")}</td>
                     <td class="nowrap">${escapeHtml(c.City || "-")}</td>
                     <td>${renderContactsCell(c)}</td>
 
@@ -5249,6 +5350,17 @@ console.log("SAVE ID:", id);
           f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
         }
       }
+
+      if(kind === "all_mainObject"){
+        const noneChecked = document.querySelector('input[name="all_mainObject_nofilter"]')?.checked;
+        if(noneChecked){
+          f.mainObject = [...MAIN_OBJECT_ALL];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="all_mainObject"]:checked')).map(el => el.value);
+          f.mainObject = vals.length ? vals : [...MAIN_OBJECT_ALL];
+        }
+      }
+
       if(kind === "Location"){
         const noneChecked = document.querySelector('input[name="all_Location_none"]')?.checked;
         if(noneChecked){
@@ -5354,6 +5466,16 @@ console.log("SAVE ID:", id);
           f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
         }
       }
+
+      if(kind === "posts_mainObject"){
+        const noneChecked = document.querySelector('input[name="posts_mainObject_nofilter"]')?.checked;
+        if(noneChecked){
+          f.mainObject = [...MAIN_OBJECT_ALL];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="posts_mainObject"]:checked')).map(el => el.value);
+          f.mainObject = vals.length ? vals : [...MAIN_OBJECT_ALL];
+        }
+      }
       if(kind === "posts_Location"){
         const noneChecked = document.querySelector('input[name="posts_Location_none"]')?.checked;
         if(noneChecked){
@@ -5441,6 +5563,16 @@ console.log("SAVE ID:", id);
           f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
         }
       }
+      if(kind === "comments_mainObject"){
+        const noneChecked = document.querySelector('input[name="comments_mainObject_nofilter"]')?.checked;
+        if(noneChecked){
+          f.mainObject = [...MAIN_OBJECT_ALL];
+        } else {
+          const vals = Array.from(document.querySelectorAll('input[name="comments_mainObject"]:checked')).map(el => el.value);
+          f.mainObject = vals.length ? vals : [...MAIN_OBJECT_ALL];
+        }
+      }
+ 
       if(kind === "comments_Location"){
         const noneChecked = document.querySelector('input[name="comments_Location_none"]')?.checked;
         if(noneChecked){
@@ -5736,6 +5868,30 @@ console.log("SAVE ID:", id);
             document.querySelectorAll('input[name="comments_Location"]').forEach(el => el.checked = false);
             const no = document.querySelector('input[name="comments_Location_none"]'); if(no) no.checked = false;
           }
+          if(action === "all_mainObject_all"){
+            document.querySelectorAll('input[name="all_mainObject"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="all_mainObject_nofilter"]'); if(no) no.checked = false;
+          }
+          if(action === "all_mainObject_none"){
+            document.querySelectorAll('input[name="all_mainObject"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="all_mainObject_nofilter"]'); if(no) no.checked = false;
+          }
+          if(action === "posts_mainObject_all"){
+            document.querySelectorAll('input[name="posts_mainObject"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="posts_mainObject_nofilter"]'); if(no) no.checked = false;
+          }
+          if(action === "posts_mainObject_none"){
+            document.querySelectorAll('input[name="posts_mainObject"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="posts_mainObject_nofilter"]'); if(no) no.checked = false;
+          }
+          if(action === "comments_mainObject_all"){
+            document.querySelectorAll('input[name="comments_mainObject"]').forEach(el => el.checked = true);
+            const no = document.querySelector('input[name="comments_mainObject_nofilter"]'); if(no) no.checked = false;
+          }
+          if(action === "comments_mainObject_none"){
+            document.querySelectorAll('input[name="comments_mainObject"]').forEach(el => el.checked = false);
+            const no = document.querySelector('input[name="comments_mainObject_nofilter"]'); if(no) no.checked = false;
+          }
           return;
         }
         if(e.target.closest(".filterPopover")) return;
@@ -5824,6 +5980,33 @@ console.log("SAVE ID:", id);
         }
         if(e.target && e.target.name === "comments_Location"){
           const no = document.querySelector('input[name="comments_Location_none"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "all_mainObject_nofilter"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="all_mainObject"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "all_mainObject"){
+          const no = document.querySelector('input[name="all_mainObject_nofilter"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "posts_mainObject_nofilter"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="posts_mainObject"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "posts_mainObject"){
+          const no = document.querySelector('input[name="posts_mainObject_nofilter"]');
+          if(no) no.checked = false;
+        }
+        if(e.target && e.target.name === "comments_mainObject_nofilter"){
+          if(e.target.checked){
+            document.querySelectorAll('input[name="comments_mainObject"]').forEach(el => el.checked = false);
+          }
+        }
+        if(e.target && e.target.name === "comments_mainObject"){
+          const no = document.querySelector('input[name="comments_mainObject_nofilter"]');
           if(no) no.checked = false;
         }
       });

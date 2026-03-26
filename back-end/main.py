@@ -175,8 +175,8 @@ def get_db():
 def map_user(row):
     d = dict(row)
     return {
-        "UserID": d.get("id"),                     # ВНУТРЕННИЙ ID
-        "FBUserID": d.get("user_id"),              # Facebook ID
+        "UserID": d.get("id"),                     
+        "FBUserID": d.get("user_id"),           
         "UserName": d.get("user_name"),
         "ProfileURL": d.get("profile_url"),
         "PostsAllCount": d.get("real_posts_count"),
@@ -198,6 +198,7 @@ def map_post(row):
         "TextPost": d.get("text") or d.get("post_summary"),
         "PostDate": d.get("created_at") or d.get("date"),
         "SellBuy": d.get("post_sell_or_buy") or d.get("sell_buy") or "unknown",
+        "Main_object": d.get("main_object"),
         "City": d.get("post_city") or d.get("city"),
         "LandSize": d.get("post_land_size") or d.get("land_size"),
         "Price": d.get("post_price") or d.get("price"),
@@ -215,24 +216,18 @@ def map_comment(row):
     return {
         "CommentID": d["comment_id"],
         "PostID": d["post_id"],
-
-        # ✅ АВТОР КОММЕНТА
         "UserID": d.get("comment_user_id"),
         "UserName": d.get("comment_user_name") or "Anonymous",
         "ProfileURL": d.get("comment_user_url") or "",
-
-        # ✅ АВТОР ПОСТА (отдельно, чтобы не путать)
         "PostOwnerID": d.get("post_owner_id"),
         "PostOwnerName": d.get("post_owner_name"),
         "PostOwnerURL": d.get("post_owner_url") or "",
-
         "TextComment": d.get("comment_text") or "",
         "TextPost": d.get("post_text") or "",
         "PostURL": d.get("post_url") or "",
-
         "CommentDate": d.get("comment_date"),
-
         "SellBuy": d.get("comment_sell_or_buy") or "unknown",
+        "Main_object": d.get("comment_main_object"),
         "City": d.get("comment_city"),
         "LandSize": d.get("post_land_size"),
         "Price": d.get("post_price"),
@@ -321,11 +316,10 @@ def restore_post(post_id: str, user=Depends(auth_required)):
     return {"success": True}
 
 
-
 @app.get("/comments")
 def get_comments(
     user=Depends(auth_required),
-    user_id: Optional[str] = None  # FB user_id
+    user_id: Optional[str] = None
 ):
     conn = get_db()
     cur = conn.cursor()
@@ -350,6 +344,7 @@ def get_comments(
             p.user_url      AS post_owner_url,
 
             c.comment_sell_or_buy,
+            c.comment_main_object,
             c.comment_city,
             p.post_land_size,
             p.post_price,
@@ -361,8 +356,6 @@ def get_comments(
     """
 
     params = []
-
-    # 🔥 ВОТ ГЛАВНОЕ
     if user_id:
         query += " WHERE cu.user_id = ? "
         params.append(user_id)
@@ -448,7 +441,6 @@ def update_user_status(user_id: str, data: dict = Body(...)):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
-    # 1️⃣ Получаем старый статус
     cur.execute(
         "SELECT contacted FROM User WHERE user_id=?",
         (user_id,)
@@ -461,18 +453,15 @@ def update_user_status(user_id: str, data: dict = Body(...)):
 
     old_status = row[0]
 
-    # 2️⃣ Если статус не изменился — выходим
     if old_status == new_status:
         conn.close()
         return {"success": True, "message": "Status unchanged"}
 
-    # 3️⃣ Обновляем текущий статус
     cur.execute(
         "UPDATE User SET contacted=? WHERE user_id=?",
         (new_status, user_id)
     )
 
-    # 4️⃣ Пишем историю
     cur.execute(
         """
         INSERT INTO UserStatusHistory (user_id, old_status, new_status)
@@ -507,13 +496,6 @@ def get_all(user=Depends(auth_required)):
     }
 
 
-# @app.get("/start-scraping")
-# def start_scraping(user=Depends(auth_cookie_required)):
-#     run_start_posts()
-#     run_start_comments()
-#     return {"status": "ok", "message": "Scraping started"}
-
-
 FIELDS_CONFIG = {
     "all": [
         "Type",
@@ -538,6 +520,7 @@ FIELDS_CONFIG = {
         "PostDate",
         "SellBuy",
         "City",
+        "Object",
         "LandSize",
         "Price",
         "Contacts",
@@ -553,6 +536,7 @@ FIELDS_CONFIG = {
         "UserID",
         "CommentDate",
         "SellBuy",
+        "Object",
         "City",
         "LandSize",
         "Price",
