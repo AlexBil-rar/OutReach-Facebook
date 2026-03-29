@@ -1504,19 +1504,19 @@ const DB = {
       },
 
       draft: {
-        all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        all: { query:"", dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
         users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest",status:[] },
-        posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
-        comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
-        trash: { dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+        posts: { dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+        comments:{ dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        trash: { dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
       },
 
       applied: {
-        all: { query:"", dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[0,1,2,3,4] },
+        all: { query:"", dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[0,1,2,3,4] },
         users: { q:"", contacted:"all", contacts:"all", sellBuy:"all", minComms:"", maxComms:"", lang:"all", sort:"newest", status:[0,1,2,3,4] },
-        posts: { dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
-        comments:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
-        trash:{ dateSort:"newest", sellBuy:["sell","buy","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        posts: { dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", commentsSort:"none", contacts:"all", contacted:"all", status:[] },
+        comments:{ dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
+        trash:{ dateSort:"newest", sellBuy:["sell","buy","rent","unknown"], mainObject:["Land","Residential property","Offices","Warehouses/logistics","Commercial","Unknown"], cities:[], citySort:"none", landSort:"none", priceSort:"none", priceMin:"", priceMax:"", contacts:"all", contacted:"all", status:[] },
       },
 
         
@@ -1634,14 +1634,16 @@ async function reloadPostsAndComments() {
       v = v.toLowerCase();
       if(v === "sell") return "Sell";
       if(v === "buy") return "Buy";
+      if(v === "rent") return "Rent";
       return "Unknown";
     }
 
     function inferSellBuyFromText(text){
       if(!text) return "unknown";
       const t = text.toLowerCase();
-      if(t.includes("selling") || t.includes("sell") || t.includes("for sale") || t.includes("прода")) return "sell";
-      if(t.includes("buy") || t.includes("looking to buy") || t.includes("budget") || t.includes("куплю") || t.includes("מחפש")) return "buy";
+      if(t.includes("selling") || t.includes("sell") || t.includes("for sale") || t.includes("прода") || t.includes("למכירה") || t.includes("מוכר")) return "sell";
+      if(t.includes("buy") || t.includes("looking to buy") || t.includes("budget") || t.includes("куплю") || t.includes("מחפש לקנות") || t.includes("רוצה לקנות")) return "buy";
+      if(t.includes("rent") || t.includes("להשכרה") || t.includes("לשכירות") || t.includes("מחפש לשכור") || t.includes("аренд") || t.includes("снять") || t.includes("сдать")) return "rent";
       return "unknown";
     }
 
@@ -2086,7 +2088,7 @@ document.addEventListener("click", e => {
         d.city = val("f_posts_Location");
         d.status = $("f_posts_status").value;
         d.sellBuy = val("f_posts_sellBuy") === "all"
-        ? ["sell","buy","unknown"]
+        ? ["sell","buy","rent","unknown"]
         : [val("f_posts_sellBuy")];
         d.group = val("f_posts_group");
         d.sort = val("f_posts_sort");
@@ -2367,7 +2369,7 @@ function resetFilters(){
     function ensurePostsFilters(){
       if(!state.applied.posts) state.applied.posts = {};
       const f = state.applied[state.view] || state.applied.posts;
-      if(!Array.isArray(f.sellBuy)) f.sellBuy = ["sell","buy","unknown"];
+      if(!Array.isArray(f.sellBuy)) f.sellBuy = ["sell","buy","rent","unknown"];
       if(!Array.isArray(f.cities)) f.cities = [];
       if(!f.dateSort) f.dateSort = "newest";
       if(!f.citySort) f.citySort = "none";
@@ -2389,7 +2391,7 @@ function ensureCommentsFilters(){
   const f = state.applied.comments;
 
   if(!Array.isArray(f.sellBuy))
-    f.sellBuy = ["sell","buy","unknown"];
+    f.sellBuy = ["sell","buy","rent","unknown"];
 
   if(!Array.isArray(f.cities))
     f.cities = [];
@@ -3406,7 +3408,7 @@ function applyAllFilters(rows){
   const q = (f.query || "").toLowerCase().trim();
   const sellSet = Array.isArray(f.sellBuy)
     ? f.sellBuy
-    : ["sell","buy","unknown"];
+    : ["sell","buy","rent","unknown"];
 
   const citySet = new Set(f.cities || []);
   const minPrice = f.priceMin !== "" ? Number(f.priceMin) : null;
@@ -3635,7 +3637,7 @@ function applyUsersFilters() {
   const sellSet =
     Array.isArray(f.sellBuy) && f.sellBuy.length
       ? f.sellBuy
-      : ["sell","buy","unknown"];
+      : ["sell","buy","rent","unknown"];
 
   const citySet = new Set(f.cities || []);
   const minPrice = f.priceMin !== "" ? Number(f.priceMin) : null;
@@ -3735,7 +3737,7 @@ function applyCommentsFilters(){
 
   const sellSet = Array.isArray(f.sellBuy)
     ? f.sellBuy
-    : ["sell","buy","unknown"];
+    : ["sell","buy","rent","unknown"];
 
   const citySet = new Set(f.cities || []);
 
@@ -3945,7 +3947,7 @@ function renderAllTable(rows){
   const offset = getPageOffset(state.view);
 
   const f = state.applied.all;
-  const sellBuyAll = ["sell","buy","unknown"];
+  const sellBuyAll = ["sell","buy","rent","unknown"];
 
   if(!Array.isArray(f.sellBuy) || f.sellBuy.length === 0){
     f.sellBuy = [...sellBuyAll];
@@ -3979,7 +3981,7 @@ function renderAllTable(rows){
   // Filter popover bodies
   // ------------------------
   const sellBuyChecks = sellBuyAll.map(v => {
-    const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
+    const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : (v === "rent" ? "Rent" : "Unknown"));
     return `
       <label class="filterOption">
         <input type="checkbox" name="all_sellBuy" value="${v}" ${sellSet.has(v) ? "checked" : ""}>
@@ -4543,7 +4545,7 @@ function renderPostsTable(rows){
 
       const view = state.view || "posts";
       const f = state.applied[state.view] || state.applied.posts;
-      const sellBuyAll = ["sell","buy","unknown"];
+      const sellBuyAll = ["sell","buy","rent","unknown"];
       if(!Array.isArray(f.sellBuy) || f.sellBuy.length === 0) f.sellBuy = [...sellBuyAll];
       if(!Array.isArray(f.cities)) f.cities = [];
       const sellSet = new Set(f.sellBuy);
@@ -4572,7 +4574,7 @@ function renderPostsTable(rows){
 
 
       const sellBuyChecks = sellBuyAll.map(v => {
-        const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
+        const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : (v === "rent" ? "Rent" : "Unknown"));
         return `<label class="filterOption"><input type="checkbox" name="posts_sellBuy" value="${v}" ${sellSet.has(v) ? "checked" : ""}>${label}</label>`;
       }).join("");
       const cityChecks = cityOptions.map(c => {
@@ -4801,7 +4803,7 @@ document.addEventListener("contextmenu", function(e){
     }
 function renderCommentsTable(rows){
       const f = state.applied.comments;
-      const sellBuyAll = ["sell","buy","unknown"];
+      const sellBuyAll = ["sell","buy","rent","unknown"];
       if(!Array.isArray(f.sellBuy) || f.sellBuy.length === 0) f.sellBuy = [...sellBuyAll];
       if(!Array.isArray(f.cities)) f.cities = [];
       const sellSet = new Set(f.sellBuy);
@@ -4826,7 +4828,7 @@ function renderCommentsTable(rows){
       const mainObjectBody = renderMainObjectBody("comments_mainObject", f.mainObject || []);
 
       const sellBuyChecks = sellBuyAll.map(v => {
-        const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : "Unknown");
+        const label = v === "sell" ? "Sell" : (v === "buy" ? "Buy" : (v === "rent" ? "Rent" : "Unknown"));
         return `<label class="filterOption"><input type="checkbox" name="comments_sellBuy" value="${v}" ${sellSet.has(v) ? "checked" : ""}>${label}</label>`;
       }).join("");
       const cityChecks = cityOptions.map(c => {
@@ -5337,10 +5339,10 @@ console.log("SAVE ID:", id);
       if(kind === "sellbuy"){
         const noneChecked = document.querySelector('input[name="all_sellBuy_none"]')?.checked;
         if(noneChecked){
-          f.sellBuy = ["sell","buy","unknown"];
+          f.sellBuy = ["sell","buy","rent","unknown"];
         } else {
           const vals = Array.from(document.querySelectorAll('input[name="all_sellBuy"]:checked')).map(el => el.value);
-          f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
+          f.sellBuy = vals.length ? vals : ["sell","buy","rent","unknown"];
         }
       }
 
@@ -5453,10 +5455,10 @@ console.log("SAVE ID:", id);
       if(kind === "posts_sellbuy"){
         const noneChecked = document.querySelector('input[name="posts_sellBuy_none"]')?.checked;
         if(noneChecked){
-          f.sellBuy = ["sell","buy","unknown"];
+          f.sellBuy = ["sell","buy","rent","unknown"];
         } else {
           const vals = Array.from(document.querySelectorAll('input[name="posts_sellBuy"]:checked')).map(el => el.value);
-          f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
+          f.sellBuy = vals.length ? vals : ["sell","buy","rent","unknown"];
         }
       }
 
@@ -5550,10 +5552,10 @@ console.log("SAVE ID:", id);
       if(kind === "comments_sellbuy"){
         const noneChecked = document.querySelector('input[name="comments_sellBuy_none"]')?.checked;
         if(noneChecked){
-          f.sellBuy = ["sell","buy","unknown"];
+          f.sellBuy = ["sell","buy","rent","unknown"];
         } else {
           const vals = Array.from(document.querySelectorAll('input[name="comments_sellBuy"]:checked')).map(el => el.value);
-          f.sellBuy = vals.length ? vals : ["sell","buy","unknown"];
+          f.sellBuy = vals.length ? vals : ["sell","buy","rent","unknown"];
         }
       }
       if(kind === "comments_mainObject"){

@@ -9,7 +9,7 @@ POST_SCHEMA = {
             "post_location": {"type": "string"},
             "post_intent": {
                 "type": "string",
-                "enum": ["Sell", "Buy", "Unknown"]
+                "enum": ["Sell", "Buy", "Rent", "Unknown"]
             },
             "main_object": {
                 "type": "string",
