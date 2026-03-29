@@ -1010,8 +1010,8 @@
 
     .modal{
       width: min(900px, 100%);
-      max-height: 90vh;            /* ← НЕ больше 90% экрана */
-      display: flex;               /* ← чтобы body мог сжиматься */
+      max-height: 90vh;            
+      display: flex;               
       background: var(--panel);
       flex-direction: column;
       border-radius: 14px;
@@ -1038,7 +1038,7 @@
       flex-direction: column;
       gap: 10px;
       flex: 1;
-      min-height: 0;   /* 🔥 КРИТИЧНО */ 
+      min-height: 0; 
     }
     .modalBody .metaLine{
       display:flex;
@@ -1164,7 +1164,7 @@
 }
 
 .status-0{ background:#eef2ff; color:#3730a3; } /* New */
-.status-1{ background:#f3f4f6; color:#374151; } /* Not relevant */
+.status-1{ background:#f3f4f6; color:#3730a3; } /* Not relevant */
 .status-2{ background:#fff7ed; color:#9a3412; } /* Response expected */
 .status-3{ background:#fee2e2; color:#991b1b; } /* Negative */
 .status-4{ background:#dcfce7; color:#166534; } /* Positive */
@@ -1406,7 +1406,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelector('[data-view="dashboard"]')?.remove();
   }
 
-  render(); // если render вызывается при старте
+  render();
 });
 /* ==============================
    AUTH GUARD
@@ -1475,7 +1475,7 @@ const DB = {
     DB.Group = groups;
     DB.trash = trashs
 
-    render(); // ← твой существующий рендер
+    render();
 
   } catch (err) {
     console.error("Bootstrap error:", err);
@@ -1492,7 +1492,7 @@ const DB = {
       filtersOpen: true,
 
       userFocus: null, // { UserID, UserName } to quickly jump from Users -> Posts/Comments
-      postFocus: null,   // 👈 добавить
+      postFocus: null,  
 
 
       pagination: {
@@ -1568,7 +1568,6 @@ const DB = {
     method: "PATCH"
   });
 
-  // 🔥 перезагрузить данные
   DB.Post = await apiFetch("/posts");
   DB.Comment = await apiFetch("/comments");
 
@@ -1678,7 +1677,7 @@ function openPostComments(postId) {
   state.postFocus = String(postId);
   state.userFocus = null;
 
-  closeModal();  // если есть
+  closeModal();
 
   state.view = "comments";
   state.pagination.comments.page = 1;
@@ -1856,7 +1855,6 @@ document.addEventListener("click", e => {
         {value:4, label:"Positive response"},
       ];
 
-      // for price slider ranges
       const prices = [];
       if(v === "posts"){
         for(const p of DB.Post){ if(p.Price && p.Price>0) prices.push(p.Price); }
@@ -1866,13 +1864,11 @@ document.addEventListener("click", e => {
       const minP = prices.length ? Math.min(...prices) : 0;
       const maxP = prices.length ? Math.max(...prices) : 600000;
 
-      // initialize draft min/max if null
       if((v==="posts" || v==="comments") && (d.priceMin === null || d.priceMax === null)){
         d.priceMin = minP;
         d.priceMax = maxP;
       }
 
-      // user focus pill
       const focus = state.userFocus;
       if(focus && (v==="posts" || v==="comments")){
         $("userFocusPill").style.display = "";
@@ -2195,7 +2191,7 @@ function resetFilters(){
         rows.push({
           Type: "post",
 
-          // AUTHOR OF ROW
+
           UserID: p.UserID,
           UserName: userName,
           ProfileURL: u?.ProfileURL || "",
@@ -2212,10 +2208,11 @@ function resetFilters(){
           City: p.City || "-",
           LandSize: p.LandSize || 0,
           Price: p.Price || 0,
+          Main_object: p.Main_object || "Unknown",
 
           SellOrBuy: (p.SellBuy || p.SellOrBuy || inferSellBuyFromText(p.TextPost) || "unknown").toLowerCase(),
 
-          Contacts: p.Contacts || "",
+          Contacts: p.Contacts || "", 
           DateISO: p.PostDate,
           notes: p.notes || "",
           trash: p.trash || "",
@@ -2235,7 +2232,7 @@ function resetFilters(){
       for (const c of DB.Comment) {
 
   const p = postById(c.PostID);
-  if (!p) continue; // ⬅️ обязательно
+  if (!p) continue; 
 
   const g = GroupById(p.GroupID);
 
@@ -2258,24 +2255,21 @@ function resetFilters(){
   rows.push({
   Type: "comment",
 
-  // 🔥 УНИФИЦИРОВАННЫЙ АКТЁР СТРОКИ
   UserID: commentAuthorId,
   UserName: commentAuthorName,
   ProfileURL: commentAuthorProfile,
 
-  // (можно оставить если нужно отдельно)
   CommentUserID: commentAuthorId,
   CommentUserName: commentAuthorName,
   CommentProfileURL: commentAuthorProfile,
 
   PostOwnerID: p.UserID || "",
+  Main_object: c.Main_object || "Unknown",  
 
-  // COMMENT DATA
   CommentID: c.CommentID,
   Text: c.TextComment || "",
   DateISO: c.CommentDate,
 
-  // POST DATA
   PostID: p.PostID,
   PostText: p.TextPost || "",
   PostURL: p.Posturl || "",
@@ -2424,7 +2418,7 @@ function ensureCommentsFilters(){
   if(!Array.isArray(f.status))
     f.status = [0,1,2,3,4];
 
-  state.postFocus = null;   // 🔥 ВОТ ЭТО ГЛАВНОЕ
+  state.postFocus = null;  
 
   state.draft.comments = JSON.parse(JSON.stringify(f));
 }
@@ -2537,7 +2531,7 @@ function paginateRows(rows){
   const pageSize = Math.max(1, Number(pg.pageSize || 50));
   const totalPages = Math.max(1, Math.ceil((Number(total) || 0) / pageSize));
 
-  // если после фильтра текущая страница стала больше доступных — откатим
+
   if(pg.page > totalPages) pg.page = 1;
 
   const page = Math.max(1, Number(pg.page || 1));
@@ -2727,12 +2721,12 @@ function renderContactsCell(entity){
 
   const preview = [];
 
-  // ✔ показываем реальные номера
+
   if(phones.length){
     preview.push(phones.join(", "));
   }
 
-  // ✔ email / web — как типы, не как шум
+
   if(emails.length){
     preview.push("Email");
   }
@@ -2823,7 +2817,7 @@ function getActiveFilterLabels(view) {
 
   const labels = [];
 
-  // Sell/Buy
+
   if (Array.isArray(filters.sellBuy)) {
 
     const DEFAULT = ["sell", "buy", "unknown"];
@@ -2942,7 +2936,7 @@ openModal({
   buttons: []
 });
 
-// ⚠️ Инициализация ТОЛЬКО ПОСЛЕ openModal
+
 requestAnimationFrame(() => {
 
   const el = document.querySelector("#exportFields");
@@ -3102,7 +3096,7 @@ function buildFileName(view, filters){
       `;
     }
 
-    // After table render, show More button only when text overflows 2 lines
+
     function detectOverflowAndToggleMore(){
       const cells = document.querySelectorAll(".clampCell");
       cells.forEach(cell => {
@@ -3114,7 +3108,7 @@ function buildFileName(view, filters){
       });
     }
 
-    // Keep the top scrollbar in sync with the main table container
+
     function syncScrollbars(){
       const wrap = $("tableWrap");
       const top = $("tableScrollTop");
@@ -3124,7 +3118,7 @@ function buildFileName(view, filters){
 
       spacer.style.width = table.scrollWidth + "px";
       top.scrollLeft = wrap.scrollLeft;
-      // ensure the top bar stays visible even when content fits; small width keeps scrollbar area usable
+
       top.style.display = "block";
 
       let lock = false;
@@ -3243,7 +3237,7 @@ function render(){
 
         if (r.Type === "group") return false;
 
-        // скрываем посты из мусорки
+
         if (r.Type === "post") {
           const post = DB.Post.find(p => String(p.PostID) === String(r.PostID));
           if (post && Number(post.trash) === 1) return false;
@@ -3385,7 +3379,7 @@ function applyAllFilters(rows){
   rows = (Array.isArray(rows) ? rows : [])
     .filter(r => r && r.Type !== "group");
 
-  // 🔥 USER FOCUS
+
   if (state.userFocus) {
     const focusId = String(state.userFocus.UserID);
 
@@ -3420,7 +3414,7 @@ function applyAllFilters(rows){
 
   const out = rows.filter(r => {
 
-    // 🔥 STATUS FILTER (фикс)
+
     if (Array.isArray(f.status) && f.status.length > 0) {
 
         const userId =
@@ -3486,7 +3480,7 @@ function applyAllFilters(rows){
     return true;
   });
 
-  // 🔥 SORTING
+
 if (f.landSort && f.landSort !== "none") {
   const dir = f.landSort === "asc" ? 1 : -1;
   out.sort((a,b) => (getAllRowLand(a) - getAllRowLand(b)) * dir);
@@ -3526,7 +3520,7 @@ function applyUsersFilters() {
   if (!Array.isArray(f.status)) {
     f.status = [0,1,2,3,4];
   }
-  // 1️⃣ Сначала просто собираем расширенные данные
+
   const rows = DB.User.map(u => {
 
     const last = getUserLastActivityDate(u.UserID);
@@ -3562,16 +3556,16 @@ function applyUsersFilters() {
     };
   });
 
-  // 2️⃣ А теперь фильтруем
+
   const out = rows.filter(u => {
 
-    // 🔥 STATUS
+
       if (Array.isArray(f.status) && f.status.length) {
         const userStatus = Number(u.Contacted ?? 0);
         if (!f.status.includes(userStatus)) return false;
       }
 
-      // 📇 CONTACTS
+
       if (f.contacts !== "all") {
 
         const has = hasContactsObj(extractContacts(u));
@@ -3747,20 +3741,20 @@ function applyCommentsFilters(){
 
   const out = DB.Comment.filter(c => {
 
-    // 🔥 POST FOCUS
+
         if (state.postFocus) {
           if (String(c.PostID) !== String(state.postFocus))
             return false;
         }
 
-    // 🔥 USER FOCUS
+
     if (focus) {
       const authorId = String(c.CommentUserID ?? c.UserID ?? "");
       const focusId  = String(focus.UserID ?? "");
       if (!authorId || authorId !== focusId) return false;
     }
 
-    // ✅ STATUS (через пользователя)
+
     if (Array.isArray(f.status) && f.status.length) {
       const userId = c.CommentUserID ?? c.UserID;
       const user = DB.User.find(u => String(u.UserID) === String(userId));
@@ -3770,7 +3764,6 @@ function applyCommentsFilters(){
     }
 
 
-    // 🔍 SEARCH
     if (f.q) {
       const q = String(f.q).toLowerCase();
 
@@ -3794,7 +3787,7 @@ function applyCommentsFilters(){
         return false;
     }
 
-    // 📇 CONTACTS
+
     if (f.contacts !== "all") {
 
       const has = hasContactsObj(extractContacts(c));
@@ -3813,7 +3806,7 @@ function applyCommentsFilters(){
       if (!mainObjectSet.has(obj)) return false;
     }
 
-    // 🎯 INTENT (берём из комментария ИЛИ поста)
+
     if (sellSet.length) {
       const intent =
         String(
@@ -3827,7 +3820,7 @@ function applyCommentsFilters(){
     }
 
 
-    // 🏙 CITY (берём из связанного поста)
+
     if (citySet.size) {
       const post = DB.Post.find(p => String(p.PostID) === String(c.PostID));
       const city = post?.City || "-";
@@ -5572,7 +5565,6 @@ console.log("SAVE ID:", id);
           f.mainObject = vals.length ? vals : [...MAIN_OBJECT_ALL];
         }
       }
- 
       if(kind === "comments_Location"){
         const noneChecked = document.querySelector('input[name="comments_Location_none"]')?.checked;
         if(noneChecked){
